@@ -6,7 +6,11 @@ if(NOT MKL_FOUND)
   set(MKL_LIBRARIES "")
   message(STATUS "robust_gtsam: MKL not found — linking GTSAM without MKL (Eigen+TBB).")
 endif()
-find_package(TBB REQUIRED)
+# Thesis change vs upstream: use TBB's CONFIG package (oneTBB ships TBBConfig.cmake
+# on Ubuntu 22.04) instead of the vendored FindTBB.cmake module, which reads the
+# removed header tbb/tbb_stddef.h and errors on oneTBB. Link names (tbb/tbbmalloc)
+# are unchanged and resolve against the system libs.
+find_package(TBB CONFIG REQUIRED)
 find_package(KimeraRPGO REQUIRED)
 
 include_directories(

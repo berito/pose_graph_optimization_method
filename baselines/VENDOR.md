@@ -28,10 +28,22 @@ These are the only edits made to the vendored code; everything else is upstream-
    build with nothing more than the IPC fork already needs.
 2. `robust_gtsam/CMakeLists.txt` — Intel **MKL** made optional (`find_package(MKL QUIET)`);
    GTSAM is linked against Eigen+TBB instead.
+3. `robust_g2o/CMakeLists.txt` — yaml-cpp **target alias** shim: Ubuntu 22.04 ships yaml-cpp 0.7
+   which exports `yaml-cpp` (un-namespaced); add `yaml-cpp::yaml-cpp` alias so the existing link
+   lines resolve on both 0.7 and 0.8.
+4. `CMakeLists.txt` (top) — add the **SuiteSparse include dir** (`find_path(CSPARSE_INCLUDE_DIR cs.h …)`):
+   the RRR baseline includes g2o's csparse solver header, which does `#include <cs.h>`.
+5. `robust_gtsam/CMakeLists.txt` — TBB found via **CONFIG mode** (`find_package(TBB CONFIG REQUIRED)`)
+   instead of the vendored `cmake/FindTBB.cmake`, which reads the removed header `tbb/tbb_stddef.h`
+   and errors on Ubuntu 22.04's oneTBB.
+6. `robust_g2o/src/incr/rrr_2D.cpp`, `rrr_3D.cpp` — qualify `make_unique` → `std::make_unique`
+   (this g2o ships `g2o::make_unique`; with `using namespace std;` + `using namespace g2o;` the bare
+   call was ambiguous). The offline `src/off/rrr_*.cpp` already used `std::`.
 
-To refresh from upstream: re-clone, re-strip, and re-apply the two edits above.
+All six fixes are build-portability only — no algorithm/behavior change. To refresh from upstream:
+re-clone, re-strip, and re-apply the edits above.
 
 ## License / citation
 
 Upstream terms apply to this directory. Cite the IPC paper (see repo root
-`ATTRIBUTION.md`) and Olivastri's robust-optimization work for any use of these baselines.
+`docs/ATTRIBUTION.md`) and Olivastri's robust-optimization work for any use of these baselines.

@@ -1,6 +1,13 @@
 find_package(glog QUIET)
 find_package(yaml-cpp REQUIRED)
 
+# Thesis change vs upstream: yaml-cpp 0.7 (Ubuntu 22.04) exports the target as
+# `yaml-cpp`, not the namespaced `yaml-cpp::yaml-cpp` (added in 0.8). Provide the
+# alias so the existing `yaml-cpp::yaml-cpp` link lines resolve on either version.
+if(NOT TARGET yaml-cpp::yaml-cpp AND TARGET yaml-cpp)
+  add_library(yaml-cpp::yaml-cpp ALIAS yaml-cpp)
+endif()
+
 add_subdirectory(thirdParty)
 
 include_directories(

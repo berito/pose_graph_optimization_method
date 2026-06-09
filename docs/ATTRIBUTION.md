@@ -16,7 +16,7 @@ This repository is a **thesis fork of IPC**, extended for correlation-aware robu
 
 The original IPC code (the χ² consensus backend, g2o I/O, `scripts/generateDataset.py` — itself derived from the
 [Vertigo](https://github.com/OpenSLAM-org/openslam_vertigo) dataset generator, the example testers, and the bundled
-SE(2) datasets in `datasets/2D/`) is the work of the IPC authors. All of it is retained here as the experimental base.
+SE(2) datasets in `experiments/datasets/2D/`) is the work of the IPC authors. All of it is retained here as the experimental base.
 
 ## What is *this thesis's* contribution (the diff)
 Everything we add lives clearly on top of upstream:

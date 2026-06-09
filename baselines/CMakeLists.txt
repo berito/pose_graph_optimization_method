@@ -27,6 +27,12 @@ get_target_property(EIGEN3_INCLUDE_DIRS Eigen3::Eigen INTERFACE_INCLUDE_DIRECTOR
 find_package(yaml-cpp REQUIRED)
 find_package(G2O REQUIRED)
 
+# Some baselines (RRR) include g2o's csparse solver header, which does
+# #include <cs.h> — cs.h ships in SuiteSparse's include dir (not on the default
+# compile line). Locate it once here so every baseline subproject inherits it.
+find_path(CSPARSE_INCLUDE_DIR cs.h PATHS /usr/include/suitesparse /usr/local/include/suitesparse /usr/include)
+include_directories(${CSPARSE_INCLUDE_DIR})
+
 # g2o baselines (SC / MaxMix / DCS / GNC / Huber / RRR) + metric evaluator.
 # These need only g2o + yaml-cpp + glog — same toolchain as the IPC fork.
 add_subdirectory(robust_g2o)

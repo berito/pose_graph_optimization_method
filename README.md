@@ -5,7 +5,7 @@ correlation-blind robust pose-graph optimization on **correlated (grouped) outli
 It bundles our IPC fork *and* the standard robust-PGO baselines so the whole comparison
 builds and runs from a single clone.
 
-See `ATTRIBUTION.md` for what is upstream vs. our contribution, and `TASKS.md`
+See [`docs/ATTRIBUTION.md`](docs/ATTRIBUTION.md) for what is upstream vs. our contribution, and `TASKS.md`
 for the experiment plan. The original upstream IPC README (prerequisites, usage,
 citation) is preserved verbatim at [`ipc/README.md`](ipc/README.md).
 
@@ -23,14 +23,17 @@ robust_pgo/
 │   └── VENDOR.md       provenance + local patches
 ├── scripts/            our generators (generateCorrelatedDataset.py, …)
 ├── cfg/                IPC run configs (2D/3D)
-├── datasets/           graphs + ground truth (gitignored)
-└── experiments/        our configs, runs, results
+└── experiments/        our experiment workspace
+    ├── datasets/       clean source graphs + ground truth (gitignored)
+    ├── configs/        experiment-specific run configs
+    ├── results/        generated spoiled data + metrics (gitignored)
+    └── scripts/        run harness (run_method.sh)
 ```
 
 ## Build
 
-Everything builds into one `build/`. Dependencies are provided by `.devcontainer/`
-(see `DEPENDENCIES.md` to build on the host instead).
+Everything builds into one `build/`. Dependencies are provided automatically by
+`.devcontainer/` — see **Dependencies** below only if you build on the host.
 
 ```bash
 mkdir -p build && cd build
@@ -63,10 +66,43 @@ GNC, Huber, RRR) and the consistency-set comparator **PCM** — the closest prio
 the same g2o dataset format our `generateCorrelatedDataset.py` produces, so the comparison is
 apples-to-apples.
 
+## Dependencies
+
+The `.devcontainer/` installs all of this automatically (recommended). Only follow this if you
+build on the host. Two tiers:
+- **Default** (`ipc/` + g2o baselines + evaluator) needs **g2o + glog + yaml-cpp + Boost + Eigen**.
+- **GTSAM tier** (`-DBUILD_GTSAM_BASELINES=ON`, incl. PCM) additionally needs **GTSAM + Kimera-RPGO + TBB**.
+
+```bash
+# system packages (Ubuntu 20.04/22.04/24.04)
+sudo apt update && sudo apt install -y \
+    build-essential cmake git pkg-config \
+    libeigen3-dev libboost-all-dev libgoogle-glog-dev libgflags-dev libyaml-cpp-dev \
+    libsuitesparse-dev libcholmod3 libtbb-dev \
+    python3 python3-pip python3-numpy python3-matplotlib
+
+# g2o (pinned tag; install to /usr/local so find_package(G2O) locates it)
+git clone https://github.com/RainerKuemmerle/g2o.git && cd g2o && git checkout 20201223_git
+mkdir build && cd build && cmake .. -DCMAKE_BUILD_TYPE=Release -DCMAKE_INSTALL_PREFIX=/usr/local
+make -j$(nproc) && sudo make install && sudo ldconfig && cd ../..
+
+# GTSAM tier only (skip if not building -DBUILD_GTSAM_BASELINES=ON):
+git clone https://github.com/borglab/gtsam.git && cd gtsam && git checkout 4.2.0
+mkdir build && cd build && cmake .. -DCMAKE_BUILD_TYPE=Release -DCMAKE_INSTALL_PREFIX=/usr/local \
+    -DGTSAM_USE_SYSTEM_EIGEN=ON -DGTSAM_WITH_TBB=ON -DGTSAM_BUILD_WITH_MARCH_NATIVE=OFF -DGTSAM_BUILD_TESTS=OFF
+make -j$(nproc) && sudo make install && sudo ldconfig && cd ../..
+git clone https://github.com/MIT-SPARK/Kimera-RPGO.git && cd Kimera-RPGO
+mkdir build && cd build && cmake .. -DCMAKE_BUILD_TYPE=Release -DCMAKE_INSTALL_PREFIX=/usr/local
+make -j$(nproc) && sudo make install && sudo ldconfig && cd ../..
+```
+
+Notes: Intel MKL is intentionally not required (GTSAM links Eigen+TBB). `evo` (`pip install evo`) is
+optional, for ATE/RPE plots. ROS is only needed if a config sets `visualize: 1`.
+
 ## Cite
 
 Built on IPC (Olivastri & Pretto, ICRA 2024) and Olivastri's robust-optimization baselines —
-see `ATTRIBUTION.md` and `baselines/VENDOR.md`.
+see [`docs/ATTRIBUTION.md`](docs/ATTRIBUTION.md) and `baselines/VENDOR.md`.
 
 ```bibtex
 @INPROCEEDINGS{olivastri2024ipc,
