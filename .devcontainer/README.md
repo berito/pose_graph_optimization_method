@@ -7,7 +7,8 @@ Runs every C++ / Python dependency inside Docker so nothing is installed on the 
 - **Ubuntu 22.04**
 - **C++ toolchain:** `build-essential`, `cmake`, `gdb`, `pkg-config`
 - **Project deps:** Eigen3, Boost (system), glog, gflags, yaml-cpp, SuiteSparse, METIS
-- **g2o** built from source at tag **`20201223_git`** (the version this project is pinned to) and installed to `/home/slam-emix/Workspace/lib/g2o` — the exact path [CMakeLists.txt:5](../CMakeLists.txt#L5) hard-codes, so the project builds with **zero source edits**
+- **g2o** built from source at tag **`20201223_git`** (the version this project is pinned to) and installed to `/usr/local`, so `find_package(G2O)` finds it with **zero source edits**
+- **GTSAM `4.2.0`** + **Kimera-RPGO** built from source to `/usr/local` for the optional GTSAM/PCM baseline tier (`-DBUILD_GTSAM_BASELINES=ON`); **TBB** via apt
 - **Python 3** with `numpy`, `matplotlib`, `evo` for [scripts/](../scripts/)
 - Non-root `vscode` user with passwordless sudo
 

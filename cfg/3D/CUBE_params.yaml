@@ -1,7 +1,7 @@
 name : "CUBE"
-dataset : "datasets/3D/CUBE/graph.g2o"
-ground_truth : "datasets/3D/CUBE/GT.txt"
-output : "res.txt"
+dataset : "experiments/datasets/3D/CUBE/graph.g2o"
+ground_truth : "experiments/datasets/3D/CUBE/GT.txt"
+output : "experiments/results/CUBE.txt"
 visualize : 0
 canonic_inliers : 7621
 fast_reject_th : 6.251
@@ -10,3 +10,8 @@ slow_reject_th : 6.251
 slow_reject_iter_base : 100
 
 # QUESTO DATASET NON E' ADATTO (MULTIPLI ODOMETRY PER LA STESSA COPPIA DI VERTICI)
+# --- params required by this IPC code version (S0.2/S1; see TASKS.md) ---
+s_factor : 3              # IPC scaling factor S=3 (IPC paper / thesis Ch.4, all experiments). TACO uses 10(2D)/30(3D).
+use_best_k_buddies : false
+k_buddies : 0
+use_recovery : false

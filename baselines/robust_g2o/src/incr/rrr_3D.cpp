@@ -29,9 +29,9 @@ int main(int argc, char **argv)
 	int nIter = cfg.maxiters; // 50
 
 	SparseOptimizer optimizer;
-	auto linearSolver = make_unique<LinearSolverEigen<BlockSolverX::PoseMatrixType>>();
+	auto linearSolver = std::make_unique<LinearSolverEigen<BlockSolverX::PoseMatrixType>>();
 	linearSolver->setBlockOrdering(false);
-	auto blockSolver = make_unique<BlockSolverX>(move(linearSolver));
+	auto blockSolver = std::make_unique<BlockSolverX>(move(linearSolver));
 	OptimizationAlgorithmGaussNewton *solver = new OptimizationAlgorithmGaussNewton(move(blockSolver));
 	optimizer.setAlgorithm(solver);
 	optimizer.load(input_dataset.c_str());
@@ -100,9 +100,9 @@ int main(int argc, char **argv)
 	rrr_ref.robustify();
 	rrr_ref.removeIncorrectLoops();
 
-	auto reflinearSolver = make_unique<LinearSolverEigen<BlockSolverX::PoseMatrixType>>();
+	auto reflinearSolver = std::make_unique<LinearSolverEigen<BlockSolverX::PoseMatrixType>>();
 	reflinearSolver->setBlockOrdering(false);
-	auto refblockSolver = make_unique<BlockSolverX>(move(reflinearSolver));
+	auto refblockSolver = std::make_unique<BlockSolverX>(move(reflinearSolver));
 	OptimizationAlgorithmDogleg *refsolver = new OptimizationAlgorithmDogleg(move(refblockSolver));
 	//optimizer.setAlgorithm(refsolver);
 

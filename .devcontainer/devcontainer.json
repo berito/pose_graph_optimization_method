@@ -7,9 +7,6 @@
   "workspaceFolder": "/workspaces/robust_pgo",
   "workspaceMount": "source=${localWorkspaceFolder},target=/workspaces/robust_pgo,type=bind,consistency=cached",
   "remoteUser": "vscode",
-  "containerEnv": {
-    "G2O_ROOT": "/home/slam-emix/Workspace/lib/g2o"
-  },
   "customizations": {
     "vscode": {
       "extensions": [
@@ -28,7 +25,7 @@
           "${workspaceFolder}/baselines",
           "/usr/include/eigen3",
           "/usr/local/include/gtsam",
-          "/home/slam-emix/Workspace/lib/g2o/include"
+          "/usr/local/include/g2o"
         ]
       }
     }

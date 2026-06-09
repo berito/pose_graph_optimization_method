@@ -67,7 +67,7 @@ python3 scripts/plotATERPET.py --result res.txt --gt gt.txt --pr res.PR
 
 ## Things to watch out for
 
-- **Hard-coded `G2O_ROOT`:** [CMakeLists.txt:5](CMakeLists.txt#L5) pins `/home/slam-emix/Workspace/lib/g2o`. On any other machine this must be edited, or the line removed so [cmake/FindG2O.cmake](cmake/FindG2O.cmake) can search system paths. Flag this before fresh-machine builds.
+- **g2o discovery:** no hard-coded path — `find_package(G2O)` (`ipc/cmake/FindG2O.cmake`) searches `/usr/local` etc. For a non-standard g2o install pass `-DG2O_ROOT=/path` or export `G2O_ROOT`.
 - **2D vs 3D templates:** the `IPC<EDGE, VERTEX>` class is templated. When adding behavior, prefer changes in the template so both `ipc_tester_2D` and `ipc_tester_3D` benefit; only specialize in the example .cpp when the type genuinely differs (e.g. how SE2/SE3 vertices are read from text).
 - **Information matrices:** g2o stores upper-triangular info matrices. Be careful when writing back graphs in `graph_fixer` — symmetry must be reconstructed.
 - **`canonic_inliers` is metric-only:** it does not influence the algorithm, only the reported precision/recall. Don't conflate it with a real algorithmic prior.

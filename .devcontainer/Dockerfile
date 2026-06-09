@@ -45,12 +45,12 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
     && rm -rf /var/lib/apt/lists/*
 
 # ---------------------------------------------------------------------------
-# Build g2o (tag 20201223_git) and install to the path CMakeLists.txt expects.
-# The top-level CMakeLists pins G2O_ROOT to /home/slam-emix/Workspace/lib/g2o;
-# we install there so the project builds unmodified. Headless build — no Qt /
+# Build g2o (tag 20201223_git) and install to /usr/local — the standard prefix
+# that find_package(G2O) (ipc/cmake/FindG2O.cmake) searches, same place we put
+# GTSAM and Kimera-RPGO. No hard-coded author path. Headless build — no Qt /
 # viewer needed for the IPC executables.
 # ---------------------------------------------------------------------------
-ENV G2O_PREFIX=/home/slam-emix/Workspace/lib/g2o
+ENV G2O_PREFIX=/usr/local
 RUN mkdir -p /tmp/g2o-src && cd /tmp/g2o-src \
     && git clone https://github.com/RainerKuemmerle/g2o.git . \
     && git checkout 20201223_git \

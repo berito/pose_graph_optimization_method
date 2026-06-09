@@ -1,14 +1,14 @@
 # robust_pgo — thesis code (correlation-aware robust PGO)
 
-**What this is:** a **thesis fork of IPC** (see `ATTRIBUTION.md`), extended to test whether **correlation-aware**
+**What this is:** a **thesis fork of IPC** (see `docs/ATTRIBUTION.md`), extended to test whether **correlation-aware**
 decisions beat per-edge/correlation-blind robust PGO on **correlated (grouped) outliers**. Experiment-first.
 
 **NOT** the abandoned `../gna_pgo` (old graph-neural-network attempt — dead, ignore it).
 
 ## On session start
-1. Read `TASKS.md` — the command-level plan (S0→S4) + the three gates.
+1. Read `TASKS.md` — the command-level plan (S0→S6) + the milestones/gates (S1 verify IPC, S2 verify TACO, then G1–G3).
 2. Check build: `ls build/ipc_tester_2D`. If missing, S0.1 (build via `.devcontainer/`).
-3. Check `docs/RUN_LOG.md` for the last step reached.
+3. Check `RUN_LOG.md` for the last step reached.
 
 ## The bet (falsification ladder — kill fast)
 - **G1:** do IPC/baselines fail on correlated outliers? (else no gap)
@@ -26,10 +26,10 @@ decisions beat per-edge/correlation-blind robust PGO on **correlated (grouped) o
 - **PCM** (`baselines/robust_gtsam`) is the closest prior art — the headline comparator for G1/G2.
 
 ## Key files
-- `ipc/src/consensus.cpp` (174 lines) — IPC's χ² accept/reject; **the decision we patch** (S2).
-- `scripts/generateDataset.py` — Vertigo random-outlier generator; **fork → `generateCorrelatedDataset.py`** (S1).
+- `ipc/src/consensus.cpp` (174 lines) — IPC's χ² accept/reject; **the decision we patch** (S4).
+- `scripts/generateDataset.py` — Vertigo random-outlier generator; **fork → `generateCorrelatedDataset.py`** (S3).
   (Upstream's own copy also lives at `baselines/scripts/` — leave it; edit ours under root `scripts/`.)
-- `datasets/2D/M3500/{graph.g2o, GT.txt}` — start dataset (graph + ground truth present).
+- `experiments/datasets/2D/M3500/{graph.g2o, GT.txt}` — start dataset (clean source graph + ground truth).
 - `cfg/2D/*.yaml` — IPC run configs. `ipc/examples/ipc_tester_2D.cpp` — the runnable.
   Baseline configs live under `baselines/robust_g2o/cfg/` and `baselines/robust_gtsam/cfg/`.
 - `experiments/` — our datasets/configs/results.
@@ -42,8 +42,8 @@ Problem + solution + decisions live in the literature monorepo:
 
 ## Discipline (THESIS_CONTRACT — Jun 9 → Jul 7)
 Total thesis exclusivity; results over prose; writing deferred. Work the gates in order; record each gate's
-verdict + key number in `docs/RUN_LOG.md` and the decisions log. Don't drift into the GNN approach or side work.
+verdict + key number in `RUN_LOG.md` and the decisions log. Don't drift into the GNN approach or side work.
 
 ## Do NOT
 - Touch `../gna_pgo` (abandoned) or the upstream reference clone `../../learning/papers_code/IPC`.
-- Commit `build/`, `datasets/`, or result outputs (see `.gitignore`).
+- Commit `build/` or run outputs under `experiments/results/` (see `.gitignore`). The small clean source datasets under `experiments/datasets/` ARE tracked.

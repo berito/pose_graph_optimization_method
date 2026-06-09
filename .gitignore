@@ -2,12 +2,18 @@
 build/
 .vscode/
 
-# Large / externally-sourced datasets — present on disk, not tracked (see ATTRIBUTION.md for sources)
-datasets/
+# Reference paper PDFs — kept locally, not tracked (large; numbers extracted into docs/IPC.md + docs/TACO.md)
+docs/*.pdf
 
-# Experiment outputs
-experiments/results/
+# NOTE: experiments/datasets/ (clean source graphs, ~2 MB of g2o/text) IS tracked — small enough to commit.
+
+# Experiment outputs — keep the dir (so IPC's ofstream can write there), ignore contents
+experiments/results/*
+!experiments/results/.gitkeep
 *.tum
+# stray run outputs anywhere (belt-and-suspenders against root clutter)
+/res.txt
+/res.PR
 **/*_est.txt
 **/*_estimate.txt
 

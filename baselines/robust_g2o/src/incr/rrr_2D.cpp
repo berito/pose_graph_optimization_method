@@ -29,9 +29,9 @@ int main(int argc, char **argv)
 	int nIter = cfg.maxiters; // 4
 
 	SparseOptimizer optimizer;
-	auto linearSolver = make_unique<LinearSolverEigen<BlockSolverX::PoseMatrixType>>();
+	auto linearSolver = std::make_unique<LinearSolverEigen<BlockSolverX::PoseMatrixType>>();
 	linearSolver->setBlockOrdering(false);
-	auto blockSolver = make_unique<BlockSolverX>(move(linearSolver));
+	auto blockSolver = std::make_unique<BlockSolverX>(move(linearSolver));
 	OptimizationAlgorithmGaussNewton *solver = new OptimizationAlgorithmGaussNewton(move(blockSolver));
 	optimizer.setAlgorithm(solver);
 	optimizer.load(input_dataset.c_str());
