@@ -1,0 +1,14 @@
+name : "INTEL"
+#dataset : "/home/slamemix/Data/RobustSLAM/3D/KITTI_00/SPOILED_DATA/100/02.g2o"
+dataset : "/home/slamemix/Data/RobustSLAM/3D/KITTI_00/graph.g2o"
+#dataset : "/home/slamemix/Workspace/RPGO/RobustOptimizationSLAM/build/robust_g2o/covariance.g2o"
+ground_truth : "/home/slamemix/Data/RobustSLAM/3D/KITTI_00/GT.txt"
+output : "res.txt"
+canonic_inliers : 80
+max_iters: 50
+inlier_th: 0.95
+switch_prior: 10.0
+maxmix_weight: 1e-1
+nu_constraint: 0.9
+nu_nullHypothesis: 1e-5
+batch_size: 1

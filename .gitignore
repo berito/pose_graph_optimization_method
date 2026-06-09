@@ -1,0 +1,22 @@
+# Build artifacts
+build/
+.vscode/
+
+# Large / externally-sourced datasets — present on disk, not tracked (see ATTRIBUTION.md for sources)
+datasets/
+
+# Experiment outputs
+experiments/results/
+*.tum
+**/*_est.txt
+**/*_estimate.txt
+
+# Python
+__pycache__/
+*.pyc
+.venv/
+
+# OS / editor
+.DS_Store
+
+# NOTE: scripts/ IS tracked (our generators live there) — unlike upstream IPC's .gitignore.

@@ -1,0 +1,37 @@
+{
+  "name": "robust_pgo (IPC + baselines)",
+  "build": {
+    "dockerfile": "Dockerfile",
+    "context": ".."
+  },
+  "workspaceFolder": "/workspaces/robust_pgo",
+  "workspaceMount": "source=${localWorkspaceFolder},target=/workspaces/robust_pgo,type=bind,consistency=cached",
+  "remoteUser": "vscode",
+  "containerEnv": {
+    "G2O_ROOT": "/home/slam-emix/Workspace/lib/g2o"
+  },
+  "customizations": {
+    "vscode": {
+      "extensions": [
+        "ms-vscode.cpptools",
+        "ms-vscode.cmake-tools",
+        "twxs.cmake",
+        "ms-python.python",
+        "redhat.vscode-yaml"
+      ],
+      "settings": {
+        "cmake.buildDirectory": "${workspaceFolder}/build",
+        "cmake.configureOnOpen": false,
+        "C_Cpp.default.cppStandard": "c++17",
+        "C_Cpp.default.includePath": [
+          "${workspaceFolder}/ipc/include",
+          "${workspaceFolder}/baselines",
+          "/usr/include/eigen3",
+          "/usr/local/include/gtsam",
+          "/home/slam-emix/Workspace/lib/g2o/include"
+        ]
+      }
+    }
+  },
+  "postCreateCommand": "echo 'Container ready. Build IPC + g2o baselines: mkdir -p build && cd build && cmake .. && make -j$(nproc). Add -DBUILD_GTSAM_BASELINES=ON for the GTSAM/PCM tier.'"
+}
