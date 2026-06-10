@@ -35,8 +35,9 @@ Two kinds of pass/fail test gate the stages:
 - **TACO (implement, S2):** authors did **not** release code → implement from the paper into a new `taco/` module wired into the superbuild. *(paper ref TBD)*
 - **Vendored baselines (comparators):** `baselines/` — SC, MaxMix, DCS, GNC, Huber, RRR in `robust_g2o/`; **PCM** + GTSAM tier in `robust_gtsam/`; metrics in `evaluator/`. **PCM = headline comparator for G1/G2.**
 - **M3500 (graph + ground truth):** `experiments/datasets/2D/M3500/{graph.g2o, GT.txt}`  ← start here
-- **Generator to fork (S3):** `scripts/generateDataset.py` (Vertigo) → new `scripts/generateCorrelatedDataset.py`
-- **Configs:** `cfg/2D/*.yaml` · baseline cfgs under `baselines/*/cfg/`
+- **Generator to fork (S3):** `ipc/scripts/generateDataset.py` (Vertigo) → new `experiments/scripts/generateCorrelatedDataset.py` (keep `ipc/` pristine)
+- **Configs:** `ipc/cfg/2D/*.yaml` · baseline cfgs under `baselines/*/cfg/`
+- **IPC experiment driver (author's, for S1):** `ipc/bash/ipc_experiments_2D.sh`
 - **Upstream refs (untouched):** `../../learning/papers_code/IPC` · github.com/EmilioOlivastri/{IPC, RobustOptimizationSLAM}
 
 > **Honest notes:** (1) build via **`.devcontainer/`** — it compiles g2o@`20201223_git` automatically, no `G2O_ROOT` edits. (2) **DC-GM is model-only** (Matlab/SDP) — reimplement its two terms, not its code. (3) **DC-SAM not needed until S5** — S4 uses plain enumeration on the small group. (4) **TACO (S2) is our own implementation** — the authors released no code, so it must be verified against the TACO paper before being trusted as a comparator.
@@ -50,7 +51,7 @@ cd /home/lab_desktop/Documents/code_base/thesis/robust_pgo
 # VS Code: "Reopen in Container" (provisions g2o + GTSAM/Kimera-RPGO). Then the SUPERBUILD:
 mkdir -p build && cd build && cmake .. -DCMAKE_BUILD_TYPE=Release && make -j$(nproc)   # ipc + g2o baselines + evaluator
 #   add -DBUILD_GTSAM_BASELINES=ON to also build the GTSAM tier + PCM
-./ipc_tester_2D -c ../cfg/2D/INTEL_params.yaml      # smoke test (binary under build/ — check build/ or build/ipc/)
+./build/ipc/ipc_tester_2D -c ipc/cfg/2D/INTEL_params.yaml      # smoke test (run from repo root)
 ```
 *Native fallback:* follow the **Dependencies** section in `README.md` (apt packages + build g2o tag `20201223_git` to `/usr/local`; no `G2O_ROOT` edit needed).
 **Done when:** `build/ipc_tester_2D` runs without error.
@@ -76,7 +77,7 @@ mkdir -p build && cd build && cmake .. -DCMAKE_BUILD_TYPE=Release && make -j$(np
 **2.3 — ✅ Verify.** Reproduces TACO's claimed results within tolerance? **No → fix the implementation** until it matches the paper. Record verdict in `RUN_LOG.md`.
 
 ## S3 — Correlated generator + prove the gap · Day 5 → **GATE 1**
-**3.1 — `scripts/generateCorrelatedDataset.py`.** Read `scripts/generateDataset.py` (adds *independent random* false loops). New script injects **clusters**: pick non-adjacent poses, add false loops among them sharing a **common wrong transform** (mutually consistent), write a **`.groups` sidecar** (edge-id → cluster-id) + a random control set. **Done when:** emits a spoiled `.g2o` + `.groups`.
+**3.1 — `experiments/scripts/generateCorrelatedDataset.py`.** Read `ipc/scripts/generateDataset.py` (adds *independent random* false loops). New script injects **clusters**: pick non-adjacent poses, add false loops among them sharing a **common wrong transform** (mutually consistent), write a **`.groups` sidecar** (edge-id → cluster-id) + a random control set. **Done when:** emits a spoiled `.g2o` + `.groups`.
 
 **3.2 — Methods × regimes.** IPC + **TACO** + the **vendored baselines** (`baselines/` — **PCM** as headline; plus SC, DCS, GNC, MaxMix, RRR, Huber) on **random** vs **correlated**, several rates → `experiments/results/G1_methods.csv` (ATE + outlier precision/recall via ground-truth labels). **PCM is the key comparator** — closest prior art that *does* reason about consistency; if even PCM (and TACO) break on correlated, the gap is sharp.
 

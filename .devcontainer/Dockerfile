@@ -44,6 +44,11 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
         python3-matplotlib \
     && rm -rf /var/lib/apt/lists/*
 
+# yq (mikefarah/yq, Go) — YAML editor the IPC author's experiment scripts use
+# (e.g. `yq -i ".s_factor=10.0" cfg.yaml`). Static binary, pinned for reproducibility.
+ADD https://github.com/mikefarah/yq/releases/download/v4.53.3/yq_linux_amd64 /usr/local/bin/yq
+RUN chmod +x /usr/local/bin/yq
+
 # ---------------------------------------------------------------------------
 # Build g2o (tag 20201223_git) and install to /usr/local — the standard prefix
 # that find_package(G2O) (ipc/cmake/FindG2O.cmake) searches, same place we put

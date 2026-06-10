@@ -14,16 +14,17 @@ citation) is preserved verbatim at [`ipc/README.md`](ipc/README.md).
 ```
 robust_pgo/
 ├── CMakeLists.txt      superbuild — stitches the two halves into one build/
-├── ipc/                thesis fork of IPC (our contribution; the decision we patch)
-│   ├── src/  examples/  include/  cmake/  CMakeLists.txt
+├── ipc/                thesis fork of IPC — self-contained, mirrors the original IPC repo
+│   ├── src/ examples/ include/ cmake/ CMakeLists.txt README.md
+│   ├── bash/           author's experiment drivers (ipc_experiments_2D/3D.sh)
+│   ├── cfg/            IPC run configs (2D/3D)
+│   └── scripts/        Vertigo generator + plot (generateDataset.py, plotATERPET.py)
 ├── baselines/          vendored RobustOptimizationSLAM (Olivastri) — the comparators
 │   ├── robust_g2o/     SC · MaxMix · DCS · GNC · Huber · RRR   (g2o only)
 │   ├── robust_gtsam/   GTSAM Huber/DCS/GNC + PCM (Kimera-RPGO) (opt-in)
 │   ├── evaluator/      precision / recall / ATE metrics
 │   └── VENDOR.md       provenance + local patches
-├── scripts/            our generators (generateCorrelatedDataset.py, …)
-├── cfg/                IPC run configs (2D/3D)
-└── experiments/        our experiment workspace
+└── experiments/        our workspace (datasets, our generators, runs, results)
     ├── datasets/       clean source graphs + ground truth (gitignored)
     ├── configs/        experiment-specific run configs
     ├── results/        generated spoiled data + metrics (gitignored)

@@ -6,6 +6,8 @@ build/
 docs/*.pdf
 
 # NOTE: experiments/datasets/ (clean source graphs, ~2 MB of g2o/text) IS tracked — small enough to commit.
+# …but generated spoiled data is NOT tracked (regenerable, large):
+experiments/datasets/**/SPOILED_DATA/
 
 # Experiment outputs — keep the dir (so IPC's ofstream can write there), ignore contents
 experiments/results/*
