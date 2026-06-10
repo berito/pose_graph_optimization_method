@@ -159,6 +159,12 @@ exactly — these are the right-shape targets / sanity bounds:
 - The paper does **not** publish per-dataset precision/recall/ATE numbers, only the all-dataset averages
   in Table I (50%/100% slices) and IPC's ACTxC in Table II. Per-dataset reproduction must be judged
   against the **averaged trends**, not exact per-dataset figures.
+- **FR079 standalone recall is low (~0.33 on clean) — expected, not a bug.** FR079's `EDGE_SE2` information
+  matrices have an unusual layout (looks like TORO column order to g2o: `q_θθ=0`), but the file is
+  **byte-identical to the author's release** (verified against the IPC Google-Drive copy, 2026-06-10) — so it is
+  **not to be converted**. Its low recall is invisible in the paper (per-dataset recall isn't published) and is
+  absorbed into the 6-dataset average. **If our S1 averaged recall falls short of the paper's >80%, FR079 is the
+  first thing to investigate — but the dataset itself stays untouched.** See `HANDOFF.md` critical fact #6.
 - The concrete **χ² thresholds (e.g. 6.251 / 11.345) are not in the paper** — confirm them from the IPC
   source code, not from this reference.
 - **`k_buddies` / `use_best_k_buddies` has no paper counterpart** — there is no k / number-of-voters

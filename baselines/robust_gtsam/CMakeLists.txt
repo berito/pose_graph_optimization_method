@@ -29,6 +29,10 @@ add_executable(gtsam_DCS_2D src/dcs_2D.cpp src/utils.cpp)
 add_executable(gtsam_DCS_3D src/dcs_3D.cpp src/utils.cpp)
 add_executable(gtsam_GNC_2D src/gnc_2D.cpp src/utils.cpp)
 add_executable(gtsam_GNC_3D src/gnc_3D.cpp src/utils.cpp)
+add_executable(gtsam_GM_2D src/gm_2D.cpp src/utils.cpp)
+add_executable(gtsam_GM_3D src/gm_3D.cpp src/utils.cpp)
+add_executable(gtsam_ADAPT_2D src/adapt_2D.cpp src/utils.cpp)
+add_executable(gtsam_ADAPT_3D src/adapt_3D.cpp src/utils.cpp)
 add_executable(gtsam_PCM_2D src/rpgo_2D.cpp src/utils.cpp)
 add_executable(gtsam_PCM_3D src/rpgo_3D.cpp src/utils.cpp)
 
@@ -75,6 +79,38 @@ ${MKL_LIBRARIES}
 )
 
 target_link_libraries(gtsam_DCS_3D
+gtsam
+${MKL_LIBRARIES}
+  tbb
+  tbbmalloc
+  ${YAML_CPP_LIBRARIES}
+)
+
+target_link_libraries(gtsam_GM_2D
+gtsam
+${MKL_LIBRARIES}
+  tbb
+  tbbmalloc
+  ${YAML_CPP_LIBRARIES}
+)
+
+target_link_libraries(gtsam_GM_3D
+gtsam
+${MKL_LIBRARIES}
+  tbb
+  tbbmalloc
+  ${YAML_CPP_LIBRARIES}
+)
+
+target_link_libraries(gtsam_ADAPT_2D
+gtsam
+${MKL_LIBRARIES}
+  tbb
+  tbbmalloc
+  ${YAML_CPP_LIBRARIES}
+)
+
+target_link_libraries(gtsam_ADAPT_3D
 gtsam
 ${MKL_LIBRARIES}
   tbb

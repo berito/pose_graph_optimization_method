@@ -32,8 +32,17 @@ Do **not** skip to step 3. Do **not** modify the methods. We confirm the authors
    `experiments/scripts/aggregate_pr.py`. Paper numbers are **averaged over 6 datasets**, so a single-dataset
    run matches the **trend/bounds**, not exact figures (per-dataset numbers aren't published).
 5. **Datasets** (IPC paper): CSAIL, FR079, FRH, MIT, INTEL, M3500 — in `experiments/datasets/2D/`.
-   `canonic_inliers`: CSAIL 128, INTEL 256, M3500 1954, MIT 20, FRH 1505 (FR079 TBD — TORO `.graph`).
+   `canonic_inliers`: CSAIL 128, INTEL 256, M3500 1954, MIT 20, FRH 1505, **FR079 229**.
    Outlier rates **10–100%** (`n = rate × inliers`), **10 runs** (00–09).
+   (Inlier count = loop-closure edges `b≠a+1` in the clean graph; method validated against all 5 known values.)
+6. **FR079 — DO NOT "FIX" IT.** Its `EDGE_SE2` info matrices look malformed to g2o (`q_θθ=0`, `q_xθ` huge
+   on all 1217 edges — the TORO-vs-g2o column-order signature). **It is NOT ours to convert:** the file is
+   **byte-identical to the author's release** (verified vertices+edges against the IPC Google-Drive copy on
+   2026-06-10). The author ran this exact file, so we must too (cardinal rule). Consequence: FR079's **standalone
+   clean recall is only ~0.33** (accepts 76/229) — **this is expected**, not a bug, and is absorbed into the
+   paper's **6-dataset-averaged** recall (per-dataset recall is never published; only Table II *times* are).
+   **IF the S1 averaged recall diverges from the paper (>80%), FR079 is the first suspect — revisit it then,
+   but NEVER silently edit the author's dataset.** (Converting it would corrupt the replication.)
 
 ## Current state (at handoff)
 - Build **GREEN** in the devcontainer (IPC + 24 g2o baselines + GTSAM/PCM + evaluator).
@@ -62,3 +71,5 @@ python3 experiments/scripts/aggregate_pr.py --root experiments/results/IPC/M3500
 - Modify `ipc/` algorithm code or change the author scripts' parameter VALUES (only paths/scheduling).
 - Reinvent the generator or metrics.
 - Start the correlation-aware contribution before IPC **and** TACO are verified.
+- **Convert / "repair" FR079.graph** — it is the author's exact release file (see critical fact #6); fixing
+  its info-matrix layout would diverge from the author. Leave it as-is; if S1 averaged numbers diverge, THEN revisit.

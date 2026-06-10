@@ -18,6 +18,10 @@ experiments/results/*
 /res.PR
 **/*_est.txt
 **/*_estimate.txt
+# g2o linear-solver debug dump (Octave sparse-matrix); auto-written to cwd on a degenerate
+# system (e.g. FR079's indefinite info matrix). Diagnostic byproduct, never an input.
+debug.txt
+**/debug.txt
 
 # Python
 __pycache__/
