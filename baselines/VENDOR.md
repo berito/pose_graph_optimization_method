@@ -66,6 +66,14 @@ Fixes 1–6 are build-portability only — no algorithm/behavior change.
 
 To refresh from upstream: re-clone, re-strip, re-apply edits 1–6, re-add GM (7) and ADAPT (8) files.
 
+## Known issues
+- **gtsam HUBER (`src/huber_2D.cpp`) crashes on MIT** (`IndeterminantLinearSystemException`): it uses the raw
+  readG2o initial guess (odom-init is commented out) **and** applies Huber to ALL edges (weakening odometry), so
+  GaussNewton diverges on MIT's poor init. Fine on INTEL/CSAIL/M3500 (P=R=1). The **g2o-tier `HUBER_2D`** handles
+  MIT (P=1,R=.95) because it odom-initializes and robustifies loop edges only. For the paper we use the **gtsam**
+  comparators (GNC/DCS/HUBER/GM); fix gtsam HUBER at S3 (odom-init + loop-only kernel, like DCS/GM) or use g2o
+  HUBER for MIT. Do NOT silently change the vendored optimizer first.
+
 ## License / citation
 
 Upstream terms apply to this directory. Cite the IPC paper (see repo root

@@ -36,6 +36,39 @@ experiments/scripts/run_method.sh ipc_tester_2D cfg/2D/M3500_params.yaml experim
 
 > ⚠️ Untested until S0.1 build is green — binary paths/flags are from the READMEs; verify on first run.
 
+## Run the whole IPC campaign (S1) as a service
+
+Runs IPC over all 6 datasets × 10 rates × 10 runs (s_factor=3), in a detached Docker
+container. Keeps running after VS Code / the terminal is closed, and **auto-resumes after a
+server power-cycle** (restart policy `unless-stopped` + Docker enabled on boot). Resumable:
+finished runs are skipped on every (re)start.
+
+**Start:**
+```bash
+bash experiments/scripts/run_as_service.sh
+```
+
+**Check status / progress:**
+```bash
+docker logs -f ipc_campaign_s1                                  # live log
+find experiments/results/IPC -name '*.PR' | wc -l              # finished runs (of 600)
+docker ps --filter name=ipc_campaign_s1                        # is the service up?
+```
+
+**Stop:**
+```bash
+docker stop ipc_campaign_s1        # stop (re-run run_as_service.sh to resume)
+docker rm -f ipc_campaign_s1       # remove the container (needed if RESTART=unless-stopped)
+```
+
+**Aggregate when done** (per dataset → precision/recall/F1 vs rate):
+```bash
+python3 experiments/scripts/aggregate_pr.py --root experiments/results/IPC/M3500/<DATE>/IPC_S3
+```
+
+`run_as_service.sh` just launches `run_ipc_campaign.sh` in a container; to run directly
+(tied to the current shell) call `bash experiments/scripts/run_ipc_campaign.sh`.
+
 ## canonic_inliers per dataset (true loop closures in the CLEAN graph)
 
 Counted from `experiments/datasets/2D/<NAME>/graph.g2o` (non-consecutive `EDGE_SE2` vertex ids).

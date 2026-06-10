@@ -22,6 +22,11 @@ experiments/results/*
 # system (e.g. FR079's indefinite info matrix). Diagnostic byproduct, never an input.
 debug.txt
 **/debug.txt
+# stray dumps written to cwd by the gtsam/g2o testers
+init.txt
+**/init.txt
+refined.txt
+**/refined.txt
 
 # Python
 __pycache__/
