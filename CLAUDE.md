@@ -6,9 +6,12 @@ decisions beat per-edge/correlation-blind robust PGO on **correlated (grouped) o
 **NOT** the abandoned `../gna_pgo` (old graph-neural-network attempt — dead, ignore it).
 
 ## On session start
-1. Read `TASKS.md` — the command-level plan (S0→S6) + the milestones/gates (S1 verify IPC, S2 verify TACO, then G1–G3).
-2. Check build: `ls build/ipc_tester_2D`. If missing, S0.1 (build via `.devcontainer/`).
-3. Check `RUN_LOG.md` for the last step reached.
+1. **Read `HANDOFF.md` FIRST** — the verification campaign: what we're doing, the cardinal rule
+   (replicate the authors EXACTLY; verify IPC paper → verify TACO → then our contribution; never divert),
+   the critical facts (s=3 vs s=10, TACO params inert in IPC, deterministic spoiled data), and current state.
+2. Read `TASKS.md` — the command-level plan (S0→S6) + the milestones/gates (S1 verify IPC, S2 verify TACO, then G1–G3).
+3. Check build: `ls build/ipc_tester_2D`. If missing, S0.1 (build via `.devcontainer/`).
+4. Check `RUN_LOG.md` for the last step reached.
 
 ## The bet (falsification ladder — kill fast)
 - **G1:** do IPC/baselines fail on correlated outliers? (else no gap)
@@ -27,10 +30,10 @@ decisions beat per-edge/correlation-blind robust PGO on **correlated (grouped) o
 
 ## Key files
 - `ipc/src/consensus.cpp` (174 lines) — IPC's χ² accept/reject; **the decision we patch** (S4).
-- `scripts/generateDataset.py` — Vertigo random-outlier generator; **fork → `generateCorrelatedDataset.py`** (S3).
-  (Upstream's own copy also lives at `baselines/scripts/` — leave it; edit ours under root `scripts/`.)
+- `ipc/scripts/generateDataset.py` — Vertigo random-outlier generator; **fork → our `experiments/scripts/generateCorrelatedDataset.py`** (S3). Keep `ipc/` pristine — our generator lives outside it.
+  (Baselines also ship their own copy at `baselines/scripts/`.)
 - `experiments/datasets/2D/M3500/{graph.g2o, GT.txt}` — start dataset (clean source graph + ground truth).
-- `cfg/2D/*.yaml` — IPC run configs. `ipc/examples/ipc_tester_2D.cpp` — the runnable.
+- `ipc/cfg/2D/*.yaml` — IPC run configs. `ipc/examples/ipc_tester_2D.cpp` — the runnable. `ipc/bash/ipc_experiments_2D.sh` — the author's experiment driver.
   Baseline configs live under `baselines/robust_g2o/cfg/` and `baselines/robust_gtsam/cfg/`.
 - `experiments/` — our datasets/configs/results.
 
