@@ -29,6 +29,39 @@ Two kinds of pass/fail test gate the stages:
 | **S5** | Win **survives** a realistic (non-oracle) signal | **GATE 3**: realistic signal still wins? | Week 2 |
 | **S6** | Final results doc complete | — | Jul 7 |
 
+## Remaining tasks — by activity type
+Status (2026-06-12): **S0** ✅ build · **S1** ✅ ran — *IPC does NOT reproduce the paper* (root cause open) ·
+**baselines** ✅ ran + compared (`experiments/figures/`). The contribution (**S2–S6**) is **not started**.
+
+### 🔨 Implementation (write new code)
+- [ ] **TACO** module from the paper → new `taco/` wired into the superbuild. [S2]
+- [ ] **Correlated-outlier generator** (+ `.groups` sidecar) → `experiments/scripts/generateCorrelatedDataset.py`. [S3]
+- [ ] **Oracle group-joint decision** patch in `ipc/src/consensus.cpp`. ⭐ core [S4]
+- [ ] **Realistic grouping + DC-SAM** integration. [S5]
+
+### ▶️ Running (execute experiments)
+- [ ] Run **TACO** on the S1 setup. [S2]
+- [ ] Run **IPC + baselines on correlated vs random** data. [S3]
+- [ ] Run **oracle patch vs IPC** on correlated. [S4]
+- [ ] Run **realistic-signal** experiment. [S5]
+- [ ] **Re-run IPC** once correct iteration values are confirmed.
+
+### 🔍 Testing & Confirmation (check against the source/paper)
+- [ ] **Confirm the real iteration values** (IPC `fast/slow_reject_iter_base`; baseline `max_iters`) from author code/papers.
+- [ ] **Read the original baseline papers** (PCM, GNC, DCS, MaxMix, GM, ADAPT) → confirm their intended setup/params.
+- [ ] **Confirm dataset provenance** (CSAIL/INTEL/MIT vs the author's versions; FR079 already flagged).
+- [ ] **Verify TACO** reproduces the TACO paper. [S2 gate]
+- [ ] **Verify ADAPT** (our reimplementation) against its paper.
+
+### 🐞 Debugging (find/fix)
+- [ ] **Why IPC didn't reproduce** — the convergence / `iter_base` lead (high-precision/low-recall symptom).
+- [ ] **Fair treatment** — same iteration/time budget for baselines as IPC (the paper under-ran PCM/GNC).
+- [ ] (FR079 gtsam crashes — known; leave or handle.)
+
+### 📝 Admin / Documentation
+- [ ] **Commit** the current work to `main`.
+- [ ] **Final results doc** (S6, by Jul 7).
+
 ## Paths
 - **Repo root (superbuild):** `/home/lab_desktop/Documents/code_base/thesis/robust_pgo`
 - **Our IPC fork (patch here, S4):** `ipc/src/consensus.cpp` (174 lines — the χ² accept/reject) · tester `ipc/examples/ipc_tester_2D.cpp`

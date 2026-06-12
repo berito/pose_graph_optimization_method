@@ -1,0 +1,12 @@
+dataset: ""
+output: ""
+canonic_inliers: 0
+max_iters: 1000
+inlier_th: 0.9
+alpha: 0.99
+init_loop: false
+batch_size: 10
+switch_prior: 10.0
+maxmix_weight: 0.1
+nu_constraint: 0.95
+nu_nullHypothesis: 1.0e-5

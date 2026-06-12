@@ -9,8 +9,12 @@ docs/*.pdf
 # …but generated spoiled data is NOT tracked (regenerable, large):
 experiments/datasets/**/SPOILED_DATA/
 
-# Experiment outputs — keep the dir (so IPC's ofstream can write there), ignore contents
-experiments/results/*
+# Experiment outputs — track ONLY the small metric files (.PR ~0.1 MB, .TE ~0.2 MB) for portability;
+# ignore bulky trajectory dumps (.TRJ ~185 MB), scratch dirs, and logs (all regenerable).
+experiments/results/**
+!experiments/results/**/
+!experiments/results/**/*.PR
+!experiments/results/**/*.TE
 !experiments/results/.gitkeep
 *.tum
 # stray run outputs anywhere (belt-and-suspenders against root clutter)

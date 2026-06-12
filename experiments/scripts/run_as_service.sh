@@ -9,7 +9,7 @@ REPO="/home/ai-server-01/code_base/robust_pgo"
 SCRIPT="${SCRIPT:-experiments/scripts/run_ipc_campaign.sh}"
 
 ENV_ARGS=()
-for v in CAP DATASETS RATES RUNS TAG DATE; do
+for v in CAP DATASETS RATES RUNS TAG DATE FAST_TH SLOW_TH METHODS; do
   [ -n "${!v:-}" ] && ENV_ARGS+=("-e" "$v=${!v}")
 done
 

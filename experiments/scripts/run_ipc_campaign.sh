@@ -36,6 +36,8 @@ run_one() {
   yq -i ".ground_truth=\"$gt\""           "$yaml"
   yq -i ".output=\"$scratch/${run}.TRJ\"" "$yaml"
   yq -i ".s_factor=3.0"                   "$yaml"
+  [ -n "${FAST_TH:-}" ] && yq -i ".fast_reject_th=$FAST_TH" "$yaml"
+  [ -n "${SLOW_TH:-}" ] && yq -i ".slow_reject_th=$SLOW_TH" "$yaml"
 
   ( cd "$scratch" && "$BIN" -c "$yaml" ) >"$scratch/log.txt" 2>&1
   local rc=$?
@@ -52,7 +54,7 @@ run_one() {
 if [ "${1:-}" = "--one" ]; then shift; run_one "$@"; exit $?; fi
 
 export -f run_one valid_pr
-export REPO BIN TAG DATE
+export REPO BIN TAG DATE FAST_TH SLOW_TH
 self="$REPO/experiments/scripts/run_ipc_campaign.sh"
 
 jobs_file="$(mktemp)"

@@ -60,6 +60,8 @@ Fixes 1–6 are build-portability only — no algorithm/behavior change.
    the testers run **inner IRLS (GTSAM robust noise, fixed alpha) inside an outer loop that adapts alpha & scale c**
    from the residual distribution (Barron CVPR'19 + Chebrolu RA-L'21 2004.14938 + AEROS Frontiers'22 2110.02018).
    Verified functional: M3500@30% → alpha→-2, **P=R=1** (all 1954 inliers kept, all 586 outliers rejected).
+   **2026-06-11:** `adapt_2D.cpp` inner optimizer switched **GaussNewton → LevenbergMarquardt** — GN diverged
+   (`IndeterminantLinearSystemException`) on MIT; LM (damped) is stable. (`adapt_3D.cpp` already used LM.)
    ⚠️ **S3/G1 verification still required:** the alpha grid + truncated partition + MAD scale are pragmatic
    choices; ADAPT must be checked against the paper's reported ADAPT numbers before being trusted as a comparator
    (treat like TACO — a reimplemented method pending verification).

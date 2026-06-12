@@ -65,10 +65,9 @@ int main(int argc, char** argv)
     }
     addPrior2D(nfg);
 
-    GaussNewtonParams lmParams;
+    LevenbergMarquardtParams lmParams;
     lmParams.setMaxIterations(maxIterations);
-    lmParams.setVerbosity("SILENT");
-    GaussNewtonOptimizer lm(nfg, new_init, lmParams);
+    LevenbergMarquardtOptimizer lm(nfg, new_init, lmParams);
     result = lm.optimize();
 
     // Whitened residual magnitudes of the loop edges under the BASE noise.
