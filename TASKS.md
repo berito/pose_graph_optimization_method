@@ -1,98 +1,68 @@
 # TASKS — correlation-aware robust PGO (experiment-first)
 
-> **Companion literature tasks:** [`<studies>/thesis/robust_pgo/literature/TASKS.md`](../../../studies/thesis/robust_pgo/literature/TASKS.md) (L1–L5).
-> **Repo = superbuild:** `ipc/` (our fork, the contribution we patch) + `baselines/` (vendored comparators) + root `CMakeLists.txt`.
-> **Falsification ladder (kill fast):** G1 (baselines break on correlated?) · G2 (oracle wins?) · G3 (realistic signal holds?).
+Detailed, command-level plan. High-level phases + gates also live in the literature plan
+(`<studies>/thesis/robust_pgo/literature/TASKS.md` — literature/theory tasks only; the experiment tasks live **here**).
+**This repo is a superbuild** (see `docs/ATTRIBUTION.md` + `CLAUDE.md`): `ipc/` = our IPC fork (the contribution we patch);
+`baselines/` = vendored RobustOptimizationSLAM (the comparators); root `CMakeLists.txt` builds them together.
 
----
+**Falsification ladder (kill fast):** G1 = baselines fail on correlated outliers? · G2 = oracle-correlation wins? · G3 = realistic signal holds?
 
-## ⏰ Advisor — Sat 2026-06-13 meeting (done)
+## ⏰ Near-term deadlines (advisor)
+- **Thu Jun 11 / Fri Jun 12 2026 (online)** — present the **solution proposal: the math**. The correlation-aware / group-joint formulation (DC-GM's two terms on IPC's subgraph) — theory, not code. Source: the solution doc in the literature monorepo.
+- **Sat Jun 13 2026** — present **experiment results**. Deliverable = the **S1 IPC-reproduction** numbers (build green + IPC reproduces the paper on the authors' setup), compared against `docs/IPC.md`. ⇒ this week prioritize **S1** so there are results to show.
 
-Presented Week 1: IPC + baseline replication results (precision reproduces; recall / F1 / ATE / RPE do **not**) + the robust-PGO math + TACO understanding.
+## Milestones
+One spine: each **stage S0–S6** ends in a **milestone** (its deliverable = "done when…").
+Two kinds of pass/fail test gate the stages:
+- **Verify** (S1, S2) — reproduce a *published* method's results before trusting it. Establishes the trusted foundation.
+- **Gate G1–G3** (S3–S5) — the falsification ladder testing *our* hypothesis.
 
-**Decisions locked:**
-- **D-EVAL-3 — Replicate IPC exactly.** Follow the paper's exact steps + techniques; **ask the author directly** for the experimental procedure (iteration budget, dataset provenance, per-method setup).
-- **D-DIR-5 — Next deliverable** = experiment **the solution direction** (correlation-aware group-joint) **AND** **TACO options** (kBL + SR-SC), side by side, on the replicated pipeline. Maps to **S2** (TACO) + **S3/S4** (solution direction).
-
-> **Deliverable vs parallel.** Advisor expects the *experiments* in D-DIR-5 as the deliverable. Personal parallel work (`literature/DISCUSSION_*` notes) is sanctioned for confidence-building but is NOT the deliverable — keep separated.
-
----
-
-## ✅ WEEK 1 — COMPLETED (Mon Jun 9 → Sat Jun 13)
-
-| Stage | What landed | Evidence |
-|---|---|---|
-| **S0** ✅ Build | Superbuild compiles · `ipc_tester_2D` runs · `.devcontainer` provisions deps · `docs/ATTRIBUTION.md` + `CLAUDE.md` written | commits `f88d5e5` + `c9e189e` (Day 1) |
-| **S1** ✅ Ran | IPC ran on all 6 2D datasets via server. **Honest finding: did NOT fully reproduce paper** — precision matches; recall / F1 / ATE / RPE diverge (root cause = `iter_base` / convergence; high-precision / low-recall symptom) | commit `b796437` + figures `comparison_ourIPC_vs_paper_*.png` |
-| **Baselines** ✅ Ran + compared | PCM · GNC · DCS · MaxMix · RRR · Huber on same setup · figures + analysis committed | `experiments/figures/` + `experiments/results/` |
-| **Advisor deck** ✅ Presented | Beamer/metropolis progress-report Sat Jun 13 (Theory thread + Empirical thread) | `<studies>/.../literature/advisor/progress_report_2026-06-13.{tex,pdf}` |
-
-**Week 1 verdict:** Foundation phase delivered. Replication infra ✅ closed. The honest "didn't fully reproduce" finding becomes Week 2's first investigation (D-EVAL-3).
-
----
-
-## 🎯 WEEK 2 — ACTIVE (Mon Jun 15 → Sun Jun 21)
-
-**Headline goal:** S2 closed (TACO impl + verify) + G1 gate verdict (S3) + parallel exact-replication investigation per D-EVAL-3.
-
-### Must-ship (Week 2 deliverable to advisor)
-
-- [ ] **D-EVAL-3 — Contact IPC author directly** for exact experimental procedure (iteration budget · dataset provenance · per-method setup) ⭐
-- [ ] **S2-impl — Implement TACO from paper** → new `taco/` module in superbuild (kBL + SR-SC variants per D-DIR-5)
-- [ ] **S2-verify — Run TACO on S1 setup** → `experiments/results/S2_taco_repro.csv` · matches TACO paper within tolerance?
-- [ ] **S3-impl — Correlated-outlier generator** → `experiments/scripts/generateCorrelatedDataset.py` (clusters of non-adjacent poses sharing a wrong transform + `.groups` sidecar)
-- [ ] **S3-run — IPC + TACO + baselines on correlated vs random** → `experiments/results/G1_methods.csv`
-- [ ] **⛔ G1 GATE** — hold on random, break on correlated? PASS → S4. FAIL → STOP + record verdict in `<lit>/paper_studies/DECISIONS.md`
-
-### Stretch (if G1 passes early)
-
-- [ ] **S4-prep — Read `ipc/src/consensus.cpp`** (174-line χ² accept/reject) — locate the decision point for the patch
-
-### Background investigation (parallel to S2)
-
-- [ ] **Why IPC didn't fully reproduce** — confirm `fast/slow_reject_iter_base` values · fair iteration/time budget for baselines
-- [ ] FR079 gtsam crashes — known; leave for now
-
-### Coordination with literature side (`<studies>/.../literature/TASKS.md`)
-
-- **L1** — Problem statement final (advisor A1) — quick parallel write (~Day 6) · informs S2 framing
-- **L3** — JIT read of TACO §5.4.3 + DC-GM 2 terms · done together with S2-impl
-- **L5** — Personal deepening (DISCUSSION_*) sanctioned as parallel · NOT this week's deliverable
-
-**Week 2 deliverable target (Sun Jun 21 EOD):** S2 verified + G1 verdict logged + L1 problem-statement final + author-contact outcome captured.
-
----
-
-## 🔮 WEEK 3+ — Queued (do not start yet)
-
-- **S4** ⭐ Oracle group-joint patch in `consensus.cpp` (the make-or-break) → **G2 gate**
-- **S5** Realistic grouping + DC-SAM integration → **G3 gate**
-- **S6** Final results doc by Jul 7
-- **L2** (literature) — Provable formulation (after S2/S3 empirical signal · resolves advisor Q6)
-- Additional verification: baseline-paper reads (PCM · GNC · DCS · MaxMix · GM) · dataset provenance check (CSAIL/INTEL/MIT vs author versions) · ADAPT against its paper
-
----
-
-## Reference — Milestones spine
-
-One spine: each **stage S0–S6** ends in a **milestone** (its deliverable = "done when…"). Two kinds of pass/fail test gate the stages:
-- **Verify** (S1, S2) — reproduce a published method before trusting it
-- **Gate G1–G3** (S3–S5) — falsification ladder testing *our* hypothesis
+(Milestone = the finish line of a stage; not a separate numbering. Build the trusted base — IPC then TACO — *before* our part.)
 
 | Stage | Milestone (done when…) | Gate test | Original target |
 |---|---|---|---|
-| **S0** ✅ | Superbuild compiles; `ipc_tester_2D` runs | — | Day 1 |
-| **S1** ✅ | IPC reproduces paper within tolerance | **Verify** | Day 1–2 |
-| **S2** 🎯 | TACO impl reproduces TACO paper | **Verify** | Week 2 |
-| **S3** 🎯 | Methods hold on random, break on correlated | **GATE 1** | Week 2 |
-| **S4** ⭐ | Oracle group-joint beats baseline IPC on correlated | **GATE 2** | Week 3 |
-| **S5** | Win survives realistic (non-oracle) signal | **GATE 3** | Week 3+ |
-| **S6** | Final results doc | — | Jul 7 |
+| **S0** | Superbuild compiles; `ipc_tester_2D` runs | — (setup) | Day 1 |
+| **S1** | IPC **reproduces its paper's results** on the authors' setup (datasets, spoiling, metrics) | **Verify**: matches IPC paper within tolerance? No → fix build/setup | Day 1–2 |
+| **S2** | TACO **implemented** (authors didn't release code) + **reproduces the TACO paper** | **Verify**: matches TACO paper? No → fix impl | Day 3–4 |
+| **S3** | Correlated gap proven — methods hold on random, **break** on correlated | **GATE 1**: break on correlated? No → STOP | Day 5 |
+| **S4** ⭐ | Oracle group-joint **beats** baseline IPC on correlated | **GATE 2**: beats baseline? No → idea dead, pivot | Day 6–7 |
+| **S5** | Win **survives** a realistic (non-oracle) signal | **GATE 3**: realistic signal still wins? | Week 2 |
+| **S6** | Final results doc complete | — | Jul 7 |
 
----
+## Remaining tasks — by activity type
+Status (2026-06-12): **S0** ✅ build · **S1** ✅ ran — *IPC does NOT reproduce the paper* (root cause open) ·
+**baselines** ✅ ran + compared (`experiments/figures/`). The contribution (**S2–S6**) is **not started**.
 
-## Reference — Paths
+### 🔨 Implementation (write new code)
+- [ ] **TACO** module from the paper → new `taco/` wired into the superbuild. [S2]
+- [ ] **Correlated-outlier generator** (+ `.groups` sidecar) → `experiments/scripts/generateCorrelatedDataset.py`. [S3]
+- [ ] **Oracle group-joint decision** patch in `ipc/src/consensus.cpp`. ⭐ core [S4]
+- [ ] **Realistic grouping + DC-SAM** integration. [S5]
 
+### ▶️ Running (execute experiments)
+- [ ] Run **TACO** on the S1 setup. [S2]
+- [ ] Run **IPC + baselines on correlated vs random** data. [S3]
+- [ ] Run **oracle patch vs IPC** on correlated. [S4]
+- [ ] Run **realistic-signal** experiment. [S5]
+- [ ] **Re-run IPC** once correct iteration values are confirmed.
+
+### 🔍 Testing & Confirmation (check against the source/paper)
+- [ ] **Confirm the real iteration values** (IPC `fast/slow_reject_iter_base`; baseline `max_iters`) from author code/papers.
+- [ ] **Read the original baseline papers** (PCM, GNC, DCS, MaxMix, GM, ADAPT) → confirm their intended setup/params.
+- [ ] **Confirm dataset provenance** (CSAIL/INTEL/MIT vs the author's versions; FR079 already flagged).
+- [ ] **Verify TACO** reproduces the TACO paper. [S2 gate]
+- [ ] **Verify ADAPT** (our reimplementation) against its paper.
+
+### 🐞 Debugging (find/fix)
+- [ ] **Why IPC didn't reproduce** — the convergence / `iter_base` lead (high-precision/low-recall symptom).
+- [ ] **Fair treatment** — same iteration/time budget for baselines as IPC (the paper under-ran PCM/GNC).
+- [ ] (FR079 gtsam crashes — known; leave or handle.)
+
+### 📝 Admin / Documentation
+- [ ] **Commit** the current work to `main`.
+- [ ] **Final results doc** (S6, by Jul 7).
+
+## Paths
 - **Repo root (superbuild):** `/home/lab_desktop/Documents/code_base/thesis/robust_pgo`
 - **Our IPC fork (S4 patch target):** `ipc/src/consensus.cpp` (174 lines — χ² accept/reject) · tester `ipc/examples/ipc_tester_2D.cpp`
 - **TACO (S2 implement here):** new `taco/` module (authors released no code)
@@ -131,10 +101,12 @@ Mirror authors' setup (datasets · Vertigo random spoiling · paper's outlier ra
 **3.2** Methods × regimes — IPC + TACO + PCM + SC + DCS + GNC + MaxMix + RRR + Huber on random vs correlated → `experiments/results/G1_methods.csv`.
 **3.3** ⛔ GATE 1 — hold on random, break on correlated? PASS → S4. FAIL → STOP.
 
-### S4 — Oracle correlation-aware patch · Week 3 → GATE 2 ⭐
-**4.1** Find decision in `ipc/src/consensus.cpp` (χ² `fast_reject_th`).
-**4.2** Branch `ca-oracle`: group-joint decision using `.groups` oracle — enumerate `2^|group|` labelings, score by joint consistency, pick min cost (DC-GM correlation reward on IPC subgraph; no SDP).
-**4.3** ⛔ GATE 2 (make-or-break) — patched vs baseline IPC + TACO on correlated M3500 → `experiments/results/G2_oracle.csv`. Beats baseline → S5. Doesn't beat even with oracle → idea dead → pivot.
+## S4 — Oracle correlation-aware patch · Days 6–7 → **GATE 2** ⭐
+**4.1 — Find the decision.** Read `ipc/src/consensus.cpp` → the χ² accept/reject (`fast_reject_th`).
+
+**4.2 — Patch group-joint decision (oracle 𝒞).** On a branch (`git checkout -b ca-oracle`): when an edge belongs to a known group (from `.groups` = the **oracle**), decide the **whole group jointly** — enumerate `2^|group|` accept/reject labelings on that small group, score by joint consistency vs the trusted backbone, pick min cost. (DC-GM's correlation reward, on IPC's subgraph, solved by enumeration — no SDP.) **Done when:** patched tester runs on a correlated dataset using the labels.
+
+**4.3 — ⛔ GATE 2 (make-or-break).** Patched (oracle) vs baseline IPC (+ TACO) on correlated M3500 → `experiments/results/G2_oracle.csv`. Beats baseline → idea has legs, S5. No improvement *even with the oracle* → idea dead → pivot to adaptive-time-bound fallback or the `ipc_revision_limitation_problem` direction. Record verdict in DECISIONS.
 
 ### S5 — Realistic signal + DC-SAM · Week 3+ → GATE 3
 **5.1** Replace oracle `.groups` with derived grouping (geometric clustering / shared-source heuristic).

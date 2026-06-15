@@ -1,0 +1,21 @@
+name : "M3500"
+dataset : "experiments/datasets/2D/M3500/graph.g2o"
+ground_truth : "experiments/datasets/2D/M3500/GT.txt"
+output : "experiments/results/M3500.txt"
+visualize : 0
+canonic_inliers : 1954
+fast_reject_th : 6.251
+fast_reject_iter_base : 50
+slow_reject_th : 11.345
+slow_reject_iter_base : 100
+
+# --- DC-IPC settings (our contribution) ---
+# Correlation groups are read from "<dataset>.groups" if present (oracle labels, S4/G2);
+# absent -> singleton groups == correlation-blind IPC baseline.
+s_factor : 3              # match IPC baseline (3); raise to 10 to match TACO 2D
+use_best_k_buddies : false # true + k_buddies>0 -> kBL subgraph (borrowed from TACO)
+k_buddies : 0
+use_recovery : false       # true -> SR-SC retrospective pass (borrowed from TACO)
+
+# λ: correlation-reward strength (brief eq. term 4); 0.0 → per-edge IPC baseline.
+lambda : 0.0

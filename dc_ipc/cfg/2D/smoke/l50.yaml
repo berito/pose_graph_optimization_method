@@ -1,0 +1,15 @@
+name : "M3500_corr50_l50"
+dataset : "experiments/datasets/2D/M3500/SPOILED_DATA_CORR/50/00.g2o"
+ground_truth : "experiments/datasets/2D/M3500/GT.txt"
+output : "experiments/results/smoke_dcipc/l50.txt"
+visualize : 0
+canonic_inliers : 1954
+fast_reject_th : 6.251
+fast_reject_iter_base : 50
+slow_reject_th : 11.345
+slow_reject_iter_base : 100
+s_factor : 3
+use_best_k_buddies : false
+k_buddies : 0
+use_recovery : false
+lambda : 50.0
