@@ -1,0 +1,16 @@
+name : "M3500"
+dataset : "experiments/datasets/2D/M3500/graph.g2o"
+ground_truth : "experiments/datasets/2D/M3500/GT.txt"
+output : "experiments/results/M3500.txt"
+visualize : 0
+canonic_inliers : 1954
+fast_reject_th : 6.251
+fast_reject_iter_base : 50
+slow_reject_th : 11.345
+slow_reject_iter_base : 100
+
+# --- TACO 2D settings (thesis §5.4, p.79) ---
+s_factor : 10             # TACO 2D odometry confidence S=10 (IPC Ch.4 used 3; 3D uses 30)
+use_best_k_buddies : true # kBL-IPC: cap test subgraph to k highest-IoU loops
+k_buddies : 2             # k=2 -> 2BL variant (headline). 0/false -> full IPC subgraph.
+use_recovery : true       # enable SR-SC retrospective check (Module B)

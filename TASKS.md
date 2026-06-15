@@ -7,6 +7,8 @@ Detailed, command-level plan. High-level phases + gates also live in the literat
 
 **Falsification ladder (kill fast):** G1 = baselines fail on correlated outliers? · G2 = oracle-correlation wins? · G3 = realistic signal holds?
 
+**⭐ Baseline of record (gate verdicts are RELATIVE, not absolute):** the success criterion is **"does DC-IPC beat our own *replicated* IPC under identical conditions?"** — NOT "does it match/beat the IPC *paper's* numbers." Concretely the gate comparison is the **correlation on/off ablation on the same code + same pipeline + same data: DC-IPC (λ>0) vs DC-IPC (λ=0 ≡ IPC)**. This is internally valid **regardless of whether our IPC reproduces the paper** (S1): both arms share every assumption (thresholds, iteration budgets, spoiled data, solver), so any delta isolates the *correlation term* alone. Reproducing the paper (S1) is still pursued for honest reporting, but it is **no longer a prerequisite** for a valid G2 verdict. Report absolute paper numbers as context (`docs/AUTHOR_RESULTS.md`), but **gate on the relative improvement over the replicated baseline.**
+
 ## ⏰ Near-term deadlines (advisor)
 - **Thu Jun 11 / Fri Jun 12 2026 (online)** — present the **solution proposal: the math**. The correlation-aware / group-joint formulation (DC-GM's two terms on IPC's subgraph) — theory, not code. Source: the solution doc in the literature monorepo.
 - **Sat Jun 13 2026** — present **experiment results**. Deliverable = the **S1 IPC-reproduction** numbers (build green + IPC reproduces the paper on the authors' setup), compared against `docs/IPC.md`. ⇒ this week prioritize **S1** so there are results to show.
@@ -24,9 +26,9 @@ Two kinds of pass/fail test gate the stages:
 | **S0** | Superbuild compiles; `ipc_tester_2D` runs | — (setup) | Day 1 |
 | **S1** | IPC **reproduces its paper's results** on the authors' setup (datasets, spoiling, metrics) | **Verify**: matches IPC paper within tolerance? No → fix build/setup | Day 1–2 |
 | **S2** | TACO **implemented** (authors didn't release code) + **reproduces the TACO paper** | **Verify**: matches TACO paper? No → fix impl | Day 3–4 |
-| **S3** | Correlated gap proven — methods hold on random, **break** on correlated | **GATE 1**: break on correlated? No → STOP | Day 5 |
-| **S4** ⭐ | Oracle group-joint **beats** baseline IPC on correlated | **GATE 2**: beats baseline? No → idea dead, pivot | Day 6–7 |
-| **S5** | Win **survives** a realistic (non-oracle) signal | **GATE 3**: realistic signal still wins? | Week 2 |
+| **S3** | Correlated gap proven — methods hold on random, **break** on correlated | **GATE 1**: break on correlated (vs their own random-outlier performance)? No → STOP | Day 5 |
+| **S4** ⭐ | Oracle group-joint (DC-IPC λ>0) **beats our replicated IPC** (DC-IPC λ=0) on correlated | **GATE 2**: beats the **replicated** baseline (same code/pipeline/data)? No → idea dead, pivot | Day 6–7 |
+| **S5** | Win **survives** a realistic (non-oracle) signal, still vs the replicated baseline | **GATE 3**: realistic signal still wins? | Week 2 |
 | **S6** | Final results doc complete | — | Jul 7 |
 
 ## Remaining tasks — by activity type
@@ -116,12 +118,12 @@ mkdir -p build && cd build && cmake .. -DCMAKE_BUILD_TYPE=Release && make -j$(np
 
 **3.3 — ⛔ GATE 1.** Hold on random, **break on correlated**? Pass → S4. Don't break → STOP, record why in `<lit>/paper_studies/DECISIONS.md`.
 
-## S4 — Oracle correlation-aware patch · Days 6–7 → **GATE 2** ⭐
-**4.1 — Find the decision.** Read `ipc/src/consensus.cpp` → the χ² accept/reject (`fast_reject_th`).
+## S4 — Oracle correlation-aware decision · Days 6–7 → **GATE 2** ⭐
+**4.1 — Decision implemented in `dc_ipc/` (done).** DC-IPC (separate module; reuses ipc/ + taco/) realizes the 4-term model: `agreementCheckGroup()` decides a whole oracle group jointly by `2^|group|` enumeration (`κ` = χ² threshold, `λ` = correlation reward). `λ=0 ≡ IPC`. Compiles 2D/3D; **not yet run**. See `dc_ipc/README.md`, `docs/PARAMETERS_AUTHOR_vs_OURS.md`.
 
-**4.2 — Patch group-joint decision (oracle 𝒞).** On a branch (`git checkout -b ca-oracle`): when an edge belongs to a known group (from `.groups` = the **oracle**), decide the **whole group jointly** — enumerate `2^|group|` accept/reject labelings on that small group, score by joint consistency vs the trusted backbone, pick min cost. (DC-GM's correlation reward, on IPC's subgraph, solved by enumeration — no SDP.) **Done when:** patched tester runs on a correlated dataset using the labels.
+**4.2 — Run the correlation on/off ablation (oracle 𝒞).** On correlated M3500 (+ `.groups` from S3), run the **same `dc_ipc` binary** twice: **λ=0** (= our replicated IPC) and **λ>0** (correlation-aware), identical config otherwise → `experiments/results/G2_oracle.csv` (outlier precision/recall vs GT labels + ATE/RPE). Sweep λ. **Done when:** both arms run on the same correlated data.
 
-**4.3 — ⛔ GATE 2 (make-or-break).** Patched (oracle) vs baseline IPC (+ TACO) on correlated M3500 → `experiments/results/G2_oracle.csv`. Beats baseline → idea has legs, S5. No improvement *even with the oracle* → idea dead → pivot to adaptive-time-bound fallback or the `ipc_revision_limitation_problem` direction. Record verdict in DECISIONS.
+**4.3 — ⛔ GATE 2 (make-or-break) — RELATIVE verdict.** Compare **DC-IPC λ>0 vs DC-IPC λ=0 (our replicated IPC)** on correlated data — same code, pipeline, data, so the delta isolates the correlation term. **Pass = λ>0 measurably beats λ=0** (recovers more inliers / lower ATE on correlated; parity on random control). This does **NOT** require matching the IPC paper (S1) — the comparison is internally valid against our own baseline. No improvement *even with the oracle* → idea dead → pivot. Report the IPC-paper numbers (`docs/AUTHOR_RESULTS.md`) only as external context. Record verdict in DECISIONS + `RUN_LOG.md`.
 
 ## S5 — Realistic signal + DC-SAM + breadth · Week 2 → **GATE 3**
 - **5.1** Replace oracle `.groups` with a *derived* grouping (geometric clustering / shared-source heuristic).
