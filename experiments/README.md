@@ -1,86 +1,72 @@
-# experiments/ — our datasets, configs, runs, results
+# experiments/ — datasets, configs, runs, results
 
-Scaffold for the experiment stages in `TASKS.md` (S1 reproduce IPC · S2 TACO · S3 prove the gap · …).
+**To run an experiment, you do not need to open any script.** Pick the method's runner from the
+table below. There is **exactly one runner per method** (no duplicates).
 
+Four purpose-folders — generate, run, analyze, plus the data and results:
 ```
 experiments/
-├── datasets/   clean SOURCE graphs + ground truth (the raw IPC inputs)  — gitignored
-│               e.g. datasets/2D/M3500/{graph.g2o, GT.txt}
-├── configs/    experiment-specific run configs (e.g. one per dataset×method×regime)
-├── results/    GENERATED spoiled graphs (.g2o + .groups) + metrics CSVs + per-run outputs  — gitignored
-└── scripts/
-    └── run_method.sh   run one method on one config (handles per-tool CLI)
+├── datasets/   clean SOURCE graphs + ground truth (inputs)
+├── datagen/    ALL dataset generation (the only thing here is making datasets)
+│   ├── generate_spoiled.py          random/Vertigo outliers → SPOILED_DATA/
+│   ├── generateCorrelatedDataset.py correlated grouped outliers → SPOILED_DATA_CORR/
+│   └── genCorrCampaign.sh           driver: generate the full correlated grid
+├── scripts/    the METHOD RUNNERS (one per method) + shared run-system
+│   ├── run_ipc.sh · run_taco.sh · run_dcipc.sh · run_baseline.sh
+│   └── lib/campaign_lib.sh   shared run system (atomic save / resume / provenance)
+├── analysis/   ALL result analysis — COMMON to every method (same metrics for all)
+│   ├── evaluate.sh   run the evaluator on any .TRJ → .TE (ATE/RPE)
+│   ├── registry.py   scan ALL results → registry.csv (precision/recall/f1/ate/rpe + params)
+│   └── make_figures.py · make_comparison.py
+└── results/    outputs (.TRJ/.PR/.TE/meta.json)        — gitignored (.PR/.TE tracked)
 ```
 
-> Keep the line clear: `datasets/` holds **clean source** graphs (inputs); generators write
-> **spoiled** datasets into `results/` (outputs). Don't mix generated data into `datasets/`.
+## Which file runs which experiment
 
-## How a run works (shared by IPC + all baselines)
-
-All methods consume the **same** spoiled g2o + GT.txt + `canonic_inliers`, and each emits
-`<output>.txt` (trajectory) + `<output>.PR` (precision, recall, avg convergence time).
-
-The three tool families pass their config **differently**:
-
-| Family | Binaries | Config flag |
+| I want to run… | Use this one file | Reads config from |
 |---|---|---|
-| IPC | `ipc_tester_2D`, `ipc_tester_3D` | `-c <cfg>` |
-| g2o baselines | `IN_SC_2D`, `IN_MAXMIX_2D`, `IN_DCS_2D`, `IN_GNC_2D`, `IN_HUBER_2D`, `IN_RRR_2D` (+ `_3D`, + offline) | `-cfg <cfg>` |
-| GTSAM tier | `gtsam_DCS_2D`, `gtsam_GNC_2D`, `gtsam_PCM_2D`, `gtsam_HUBER_2D` (+ `_3D`) | `<cfg>` (positional) |
+| **IPC** | `run_ipc.sh` | `ipc/cfg/2D/<dataset>_params.yaml` |
+| **TACO** | `run_taco.sh` | `taco/cfg/2D/<dataset>_params.yaml` |
+| **DC-IPC** (λ ablation) | `run_dcipc.sh` | `dc_ipc/cfg/2D/<dataset>_params.yaml` |
+| **one baseline** (e.g. DCS) | `run_baseline.sh DCS` | `configs/baselines/<METHOD>.yaml` |
+| **all baselines** | `run_baseline.sh all all all all` | `configs/baselines/*.yaml` |
 
-`run_method.sh` hides this — it locates the binary under `build/` and picks the right flag:
+All three method runners share the same run **system** via `lib/campaign_lib.sh`: each (dataset×rate×run)
+is saved atomically the moment it finishes, finished runs are **skipped on re-run** (resume), and every
+run drops a `meta.json` (git-free provenance: binary/source/data SHA) + a snapshot of its config.
 
+### Run examples
 ```bash
-experiments/scripts/run_method.sh ipc_tester_2D cfg/2D/M3500_params.yaml experiments/results/M3500
+# DC-IPC on correlated data, λ ablation (the contribution)
+LAMBDAS="0 50" RATES="10 20 30 40 50" bash experiments/scripts/run_dcipc.sh
+
+# IPC replication on random spoiled data
+DATADIR_NAME=SPOILED_DATA RATES="10 50 100" bash experiments/scripts/run_ipc.sh
+
+# IPC on the SAME correlated data (G1 — does the baseline fail?)
+DATADIR_NAME=SPOILED_DATA_CORR SCEN_TAG=corr bash experiments/scripts/run_ipc.sh
 ```
-
-> ⚠️ Untested until S0.1 build is green — binary paths/flags are from the READMEs; verify on first run.
-
-## Run the whole IPC campaign (S1) as a service
-
-Runs IPC over all 6 datasets × 10 rates × 10 runs (s_factor=3), in a detached Docker
-container. Keeps running after VS Code / the terminal is closed, and **auto-resumes after a
-server power-cycle** (restart policy `unless-stopped` + Docker enabled on boot). Resumable:
-finished runs are skipped on every (re)start.
-
-**Start:**
+### Analyze (same for every method — that's the point)
+Every method ends in the same metrics, so analysis is one shared folder:
 ```bash
-bash experiments/scripts/run_as_service.sh
+bash   experiments/analysis/evaluate.sh      # any .TRJ → .TE  (ATE/RPE);  run inside the devcontainer
+python3 experiments/analysis/registry.py     # ALL results → experiments/results/registry.csv + an F1 pivot
 ```
+`registry.py` keys off `.PR` (so it sees every method, with or without `meta.json`), pulls ATE/RPE
+from `.TE`, and merges params/provenance from `meta.json` → one table with
+`precision, recall, f1, ate, rpe` + the parameters per run.
 
-**Check status / progress:**
-```bash
-docker logs -f ipc_campaign_s1                                  # live log
-find experiments/results/IPC -name '*.PR' | wc -l              # finished runs (of 600)
-docker ps --filter name=ipc_campaign_s1                        # is the service up?
+## Results layout
 ```
-
-**Stop:**
-```bash
-docker stop ipc_campaign_s1        # stop (re-run run_as_service.sh to resume)
-docker rm -f ipc_campaign_s1       # remove the container (needed if RESTART=unless-stopped)
+results/<METHOD>/<dataset>/<date>/<scenario>/<signature>/<rate>/<run>.{TRJ,PR,meta.json,cfg.yaml}
+  signature = ipc_s3 | taco_s10_k2_rec1 | lam50_kbl0_rec0
 ```
-
-**Aggregate when done** (per dataset → precision/recall/F1 vs rate):
-```bash
-python3 experiments/scripts/aggregate_pr.py --root experiments/results/IPC/M3500/<DATE>/IPC_S3
-```
-
-`run_as_service.sh` just launches `run_ipc_campaign.sh` in a container; to run directly
-(tied to the current shell) call `bash experiments/scripts/run_ipc_campaign.sh`.
 
 ## canonic_inliers per dataset (true loop closures in the CLEAN graph)
+Counted from `datasets/2D/<NAME>/graph.g2o` (non-consecutive `EDGE_SE2`). PR is scored against this.
 
-Counted from `experiments/datasets/2D/<NAME>/graph.g2o` (non-consecutive `EDGE_SE2` vertex ids).
-Validated: M3500=1954 and INTEL=256 match the upstream configs.
+| dataset | CSAIL | INTEL | M3500 | MIT | FRH | FR079 |
+|---|---|---|---|---|---|---|
+| canonic_inliers | 128 | 256 | 1954 | 20 | 1505 | 229 |
 
-| dataset | canonic_inliers |
-|---|---|
-| CSAIL | 128 |
-| INTEL | 256 |
-| M3500 | 1954 |
-| MIT   | 20 |
-| FRH   | 1505 |
-
-(`canonic_inliers` is a property of the clean dataset; spoiling adds outliers but does not
-change it. PR is scored against this count.)
+> `canonic_inliers` is a property of the clean dataset (spoiling adds outliers, doesn't change it).
