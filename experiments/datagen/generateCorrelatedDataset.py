@@ -66,11 +66,12 @@ def edge_str(a, b, z, info):
             % (a, b, z[0], z[1], z[2], info))
 
 
-def pick_anchors(n_poses, L, min_sep, rng, tries=200):
+def pick_anchors(n_poses, L, min_sep, max_sep, rng, tries=400):
     for _ in range(tries):
         i0 = rng.randint(0, n_poses - L)
         j0 = rng.randint(0, n_poses - L)
-        if abs(i0 - j0) < min_sep:
+        d = abs(i0 - j0)
+        if d < min_sep or d > max_sep:
             continue
         # disjoint runs
         if i0 + L <= j0 or j0 + L <= i0:
@@ -91,6 +92,8 @@ def main():
     ap.add_argument("--group-len", type=int, default=5, help="edges per group (grouped mode)")
     ap.add_argument("--min-sep", type=int, default=50,
                     help="min |i0-j0| anchor separation (a real false place)")
+    ap.add_argument("--max-sep", type=int, default=200,
+                    help="max |i0-j0| anchor separation (bounds subgraph span / runtime)")
     ap.add_argument("--sigma-t", type=float, default=0.1, help="inlier translation noise [m]")
     ap.add_argument("--sigma-r", type=float, default=0.01, help="inlier rotation noise [rad]")
     ap.add_argument("--disp-trans", type=float, default=5.0,
@@ -135,7 +138,8 @@ def main():
         while made < n_out:
             a = rng.randint(0, n_poses - 1)
             b = rng.randint(0, n_poses - 1)
-            if a == b or abs(a - b) == 1:
+            d = abs(a - b)
+            if a == b or d < args.min_sep or d > args.max_sep:
                 continue
             if a > b:
                 a, b = b, a
@@ -148,7 +152,7 @@ def main():
         made = 0
         while made < n_out:
             length = min(L, n_out - made)
-            anc = pick_anchors(n_poses, length, args.min_sep, rng)
+            anc = pick_anchors(n_poses, length, args.min_sep, args.max_sep, rng)
             if anc is None:
                 raise SystemExit("could not place a group; lower --min-sep or --group-len")
             i0, j0 = anc

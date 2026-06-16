@@ -33,7 +33,7 @@ experiments are run on this server. Update this if any condition changes.
 - Runner: `experiments/scripts/run_ipc_campaign.sh` (tag `IPC_S3`; threshold variants via `FAST_TH`/`SLOW_TH`).
 
 ## Baseline run
-- 7 comparators: PCM, GNC, DCS, HUBER, GM, ADAPT, MAXMIX. Runner: `run_baseline_campaign.sh` (tag `BASE`).
+- 7 comparators: PCM, GNC, DCS, HUBER, GM, ADAPT, MAXMIX. Runner: `run_baseline.sh <METHOD>` (tag `BASE`).
 - Per-method params + binaries + CLI: see `experiments/configs/baselines/PARAMS.md` (defaults, **not yet tuned**).
 - **HUBER** → g2o `HUBER_2D` for all datasets (gtsam HUBER diverges).
 - **ADAPT** → gtsam, our reimplementation, **Levenberg-Marquardt** inner solver, **unverified** (provisional;
