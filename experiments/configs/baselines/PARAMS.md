@@ -83,7 +83,8 @@ and the param values come from one shared cfg per tier (no per-method tuning is 
 
 ## Run
 ```
-bash experiments/scripts/run_baseline_campaign.sh                 # all 7, all datasets (TAG=BASE)
-METHODS="PCM DCS" DATASETS="M3500" bash .../run_baseline_campaign.sh   # subset
+bash experiments/scripts/run_baseline.sh DCS                  # ONE run: DCS on M3500, 50%, seed 00
+bash experiments/scripts/run_baseline.sh DCS M3500 all all     # DCS on M3500, all rates x seeds
+bash experiments/scripts/run_baseline.sh all all all all       # full campaign (all 7, all datasets)
 ```
-Resumable (skips finished runs); launch via `run_as_service.sh` for VS-Code-independent execution.
+Resumable (skips finished runs). Run inside the devcontainer.

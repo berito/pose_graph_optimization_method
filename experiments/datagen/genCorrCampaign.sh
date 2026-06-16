@@ -5,13 +5,15 @@
 set -euo pipefail
 
 ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/../.." && pwd)"
-GEN="$ROOT/experiments/scripts/generateCorrelatedDataset.py"
+GEN="$ROOT/experiments/datagen/generateCorrelatedDataset.py"
 
 DATASET="${DATASET:-M3500}"
 INLIERS="${INLIERS:-1954}"
 RATES="${RATES:-10 20 30 40 50 60 70 80 90 100}"
 TRIALS="${TRIALS:-10}"
 GROUP_LEN="${GROUP_LEN:-5}"
+MIN_SEP="${MIN_SEP:-50}"
+MAX_SEP="${MAX_SEP:-200}"
 DISP_TRANS="${DISP_TRANS:-5.0}"
 DISP_ROT="${DISP_ROT:-30.0}"
 SIGMA_T="${SIGMA_T:-0.1}"
@@ -24,7 +26,7 @@ OUT="$DSDIR/SPOILED_DATA_CORR"
 MAN="$OUT/manifest.csv"
 
 mkdir -p "$OUT"
-echo "dataset,rate,run,seed,n_outliers,inliers,group_len,disp_trans,disp_rot,mode,file,command" > "$MAN"
+echo "dataset,rate,run,seed,n_outliers,inliers,group_len,min_sep,max_sep,disp_trans,disp_rot,mode,file,command" > "$MAN"
 
 for rate in $RATES; do
   n_out=$(python3 -c "print(int(round($rate/100.0*$INLIERS)))")
@@ -32,9 +34,9 @@ for rate in $RATES; do
   for ((r=0; r<TRIALS; r++)); do
     NN=$(printf "%02d" "$r")
     f="$OUT/$rate/$NN.g2o"
-    cmd="python3 $GEN --in $IN --gt $GT --out $f --mode grouped --num-outliers $n_out --group-len $GROUP_LEN --min-sep 50 --sigma-t $SIGMA_T --sigma-r $SIGMA_R --disp-trans $DISP_TRANS --disp-rot $DISP_ROT --seed $r"
+    cmd="python3 $GEN --in $IN --gt $GT --out $f --mode grouped --num-outliers $n_out --group-len $GROUP_LEN --min-sep $MIN_SEP --max-sep $MAX_SEP --sigma-t $SIGMA_T --sigma-r $SIGMA_R --disp-trans $DISP_TRANS --disp-rot $DISP_ROT --seed $r"
     $cmd >/dev/null
-    echo "$DATASET,$rate,$NN,$r,$n_out,$INLIERS,$GROUP_LEN,$DISP_TRANS,$DISP_ROT,grouped,$f,\"$cmd\"" >> "$MAN"
+    echo "$DATASET,$rate,$NN,$r,$n_out,$INLIERS,$GROUP_LEN,$MIN_SEP,$MAX_SEP,$DISP_TRANS,$DISP_ROT,grouped,$f,\"$cmd\"" >> "$MAN"
   done
   echo "rate $rate: $n_out outliers x $TRIALS trials"
 done

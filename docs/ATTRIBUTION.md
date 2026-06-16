@@ -20,7 +20,7 @@ SE(2) datasets in `experiments/datasets/2D/`) is the work of the IPC authors. Al
 
 ## What is *this thesis's* contribution (the diff)
 Everything we add lives clearly on top of upstream:
-- `scripts/generateCorrelatedDataset.py` — **new**: injects *correlated / grouped* outliers (clusters of mutually-consistent false loops) + group-label sidecars.
+- `experiments/datagen/generateCorrelatedDataset.py` — **new**: injects *correlated / grouped* outliers (clusters of mutually-consistent false loops) + group-label sidecars.
 - A **group-joint decision** patched into `src/consensus.cpp` — the correlation-aware extension (DC-GM-style joint scoring on IPC's bounded subgraph).
 - `experiments/` — our configs, generated datasets, run scripts, and results.
 - `TASKS.md` — the thesis experiment plan.
