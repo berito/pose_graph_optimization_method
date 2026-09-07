@@ -16,6 +16,20 @@ illustration, never as evidence.**
    nothing.
 2. Check which are done: `ls src/`.
 
+## ⭐ Where the plan lives, and where the steps live
+
+**Set 2026-09-07.** The research repo is the **board**; this repo holds the **work**.
+
+| | holds |
+|---|---|
+| `research/pose_graph_optimization/planning/WEEK.md` | *that* a task exists, which kind of work it is, whether it is moving |
+| **[`TASKS.md`](TASKS.md)** — here | ⭐ **the steps**: what to actually do |
+
+[`PLAN.md`](PLAN.md) says why each figure is worth building; `TASKS.md` says what to do next.
+
+⚠ **One home each.** Do not copy the board's rows into `TASKS.md`, and do not push these
+steps back onto the board — it is a board, not a work log.
+
 ## ⭐ The maths comes from the notes, not from memory
 
 Every figure names the paper and the equation it draws, and the note it came from —
