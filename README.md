@@ -1,20 +1,34 @@
-# pose_graph_optimization_method — correlation-aware robust PGO (thesis)
+# pose_graph_optimization_method — thesis code
 
-A thesis monorepo testing whether **correlation-aware** decisions beat per-edge /
-correlation-blind robust pose-graph optimization on **correlated (grouped) outliers**.
-It bundles our IPC fork, the TACO comparator, our DC-IPC contribution *and* the standard
-robust-PGO baselines so the whole comparison builds and runs from a single clone.
+The code side of the thesis on **robust pose-graph optimization**. It holds the reference
+implementations we verify against (`ipc/`, `taco/`), the vendored comparators (`baselines/`),
+one shared experiment harness (`experiments/`), and one directory per **attempted direction**.
 
-> **On the name:** the repo was renamed from `robust_pgo`. The CMake project id
-> (`project(robust_pgo)`) and the devcontainer workspace (`/workspaces/robust_pgo`) still use the
-> old name — deliberately, since changing them invalidates existing build and container caches.
-> Old commit messages referencing `robust_pgo` are historical and cannot change.
+> ⚠ **No direction is currently selected.** This repo deliberately does **not** name a method
+> in its title. The previous name `robust_pgo` asserted a solution family before one had been
+> committed to — the same mistake that killed the earlier `gna_pgo` (which encoded
+> *Graph-Neural-Attention*, later ruled out). **Name the subject, never the method.**
+> `d1` (correlation-aware / group-joint, in `dc_ipc/`) **was tried and did not beat the
+> original**; `d2` has not started. See [`DIRECTIONS.md`](DIRECTIONS.md) before assuming any
+> direction is live — including anything a subdirectory's own README still claims for itself.
 
-See [`docs/ATTRIBUTION.md`](docs/ATTRIBUTION.md) for what is upstream vs. our contribution.
-`HANDOFF.md` is the entry point (the verification campaign and its cardinal rule), `TASKS.md`
-the command-level plan, and [`DIRECTIONS.md`](DIRECTIONS.md) the record of every direction tried
-and what became of it. The original upstream IPC README (prerequisites, usage, citation) is
-preserved verbatim at [`ipc/README.md`](ipc/README.md).
+> **On the name:** renamed from `robust_pgo`. The CMake project id (`project(robust_pgo)`) and
+> the devcontainer workspace (`/workspaces/robust_pgo`) still use the old name — deliberately,
+> since changing them invalidates existing build and container caches. Old commit messages
+> referencing `robust_pgo` are historical and cannot change.
+
+## Read in this order
+
+| file | what it is |
+|---|---|
+| `HANDOFF.md` | ⭐ start here — the verification campaign and its cardinal rule (replicate the authors exactly) |
+| [`DIRECTIONS.md`](DIRECTIONS.md) | every direction tried and what became of it — **failures stay on the record** |
+| `TASKS.md` | the command-level plan (S0→S6) and its stages |
+| `RUN_LOG.md` | the last step actually reached |
+| [`docs/ATTRIBUTION.md`](docs/ATTRIBUTION.md) | what is upstream vs. ours |
+
+The original upstream IPC README (prerequisites, usage, citation) is preserved verbatim at
+[`ipc/README.md`](ipc/README.md).
 
 ## Layout
 
@@ -31,7 +45,7 @@ pose_graph_optimization_method/
 │   ├── cfg/            IPC run configs (2D/3D)
 │   └── scripts/        Vertigo generator + plot (generateDataset.py, plotATERPET.py)
 ├── taco/               TACO comparator (kBL-IPC + SR-SC) — built ON TOP of ipc/, reuses its sources
-├── dc_ipc/             ⭐ DC-IPC — our correlation-aware contribution, built on ipc/ + taco/
+├── dc_ipc/             attempt d1 — tried, did not beat the original (see DIRECTIONS.md)
 ├── baselines/          vendored RobustOptimizationSLAM (Olivastri) — the comparators
 │   ├── robust_g2o/     SC · MaxMix · DCS · GNC · Huber · RRR   (g2o only)
 │   ├── robust_gtsam/   GTSAM Huber/DCS/GNC + PCM (Kimera-RPGO) (opt-in)
@@ -98,20 +112,21 @@ Resulting binaries (all in `build/`):
 
 | Binary | From | Method |
 |--------|------|--------|
-| `ipc_tester_2D` / `ipc_tester_3D`, `graph_fixer` | `ipc/` | IPC χ² consensus (the decision we patch) |
+| `ipc_tester_2D` / `ipc_tester_3D`, `graph_fixer` | `ipc/` | IPC χ² consensus — the reference we verify against |
 | `taco_tester_2D` / `taco_tester_3D` | `taco/` | TACO comparator (kBL-IPC + SR-SC) |
-| `dc_ipc_tester_2D` / `dc_ipc_tester_3D` | `dc_ipc/` | **DC-IPC — correlation-aware, group-joint (ours)** |
+| `dc_ipc_tester_2D` / `dc_ipc_tester_3D` | `dc_ipc/` | attempt **d1** (group-joint) — kept for the record, not a live direction |
 | `IN_SC_2D`, `IN_MAXMIX_2D`, `IN_DCS_2D`, `IN_GNC_2D`, `IN_HUBER_2D`, `IN_RRR_2D` (+ `_3D`, + offline) | `baselines/robust_g2o` | per-edge / consistency baselines |
 | `gtsam_PCM_2D`, `gtsam_{HUBER,DCS,GNC}_2D` (+ `_3D`) | `baselines/robust_gtsam` | GTSAM tier incl. **PCM** |
 | `evaluator` | `baselines/evaluator` | precision/recall/ATE |
 
 ## Why the baselines are here
 
-The thesis question is whether a **group-joint** decision beats **per-edge** robust kernels
-on grouped outliers. The vendored suite supplies the per-edge comparators (SC, MaxMix, DCS,
-GNC, Huber, RRR) and the consistency-set comparator **PCM** — the closest prior art — all on
-the same g2o dataset format our `experiments/datagen/generateCorrelatedDataset.py` produces,
-so the comparison is apples-to-apples.
+Any direction this thesis eventually takes has to be measured against the same comparators on the
+same data, so the suite is vendored once and shared: the per-edge robust kernels (SC, MaxMix, DCS,
+GNC, Huber, RRR) and the consistency-set method **PCM** — the closest prior art. They all read the
+same g2o dataset format the harness in `experiments/datagen/` produces, which is what makes any
+comparison apples-to-apples. `baselines/` is **read-only**: a comparator that gets edited stops
+being a comparator.
 
 ## Dependencies
 
@@ -146,16 +161,21 @@ make -j$(nproc) && sudo make install && sudo ldconfig && cd ../..
 Notes: Intel MKL is intentionally not required (GTSAM links Eigen+TBB). `evo` (`pip install evo`) is
 optional, for ATE/RPE plots. ROS is only needed if a config sets `visualize: 1`.
 
-## Cite
+## What is ours in here
 
-Built on IPC (Olivastri & Pretto, ICRA 2024) and Olivastri's robust-optimization baselines —
-see [`docs/ATTRIBUTION.md`](docs/ATTRIBUTION.md) and `baselines/VENDOR.md`.
+This repo is mostly **other people's code kept deliberately unmodified**, so the boundary matters.
+`docs/ATTRIBUTION.md` and `baselines/VENDOR.md` are the authoritative record; the short version:
 
-```bibtex
-@INPROCEEDINGS{olivastri2024ipc,
-  title={{IPC}: Incremental Probabilistic Consensus-based Consistent Set Maximization for SLAM Backends},
-  author={Olivastri, Emilio and Pretto, Alberto},
-  booktitle={2024 IEEE International Conference on Robotics and Automation (ICRA)},
-  year={2024}
-}
-```
+| | status |
+|---|---|
+| `ipc/` | **not ours, and not patched.** Source verified byte-identical to pinned upstream (2026-09-07). Only `cfg/*.yaml` (the author's absolute paths, unrunnable as shipped) and `CMakeLists.txt` differ. Run `scripts/check_vendor.sh` before assuming otherwise. |
+| `baselines/` | **vendored, read-only.** Six build-portability fixes only — no algorithm change. |
+| `taco/` | **ours** — a reimplementation of TACO (Olivastri PhD, Ch. 5) from the spec, built on `ipc/` sources rather than copying them. Pending verification. |
+| `baselines/` GM + ADAPT | **ours** — two comparators the IPC paper uses but the author never released. GM instantiates GTSAM's library kernel; ADAPT is a genuine reimplementation (Barron IRLS). Both pending verification. |
+| `vendor_patched/` | **ours** — fixed copies of vendored sources, because vendor code is never edited in place. |
+| `experiments/` | **ours** — the shared harness: datagen, configs, run scripts, analysis, metrics. |
+| `dc_ipc/` | **ours** — attempt `d1`. Tried; did not beat the original. Kept on the record, not a live direction. |
+| `scripts/` | **ours** — `check_vendor.sh`, the drift guard that keeps the rows above honest. |
+
+⚠ Anything in this repo marked "reimplemented" (`taco/`, GM, ADAPT) is **not yet verified against the
+authors' published numbers**. `HANDOFF.md` gives the order that verification has to happen in.

@@ -7,7 +7,7 @@ subject and whose it is; never the method.** Siblings under `code_base/thesis/`:
 `pose_graph_optimization_experiments/` (other people's code) and
 `pose_graph_optimization_math/` (the concepts, visualised).
 
-⚠ The GitHub remote is still `berito/robust_pgo` until it is renamed there.
+The GitHub remote was renamed to match: `git@github.com:berito/pose_graph_optimization_method.git`.
 
 **What this is:** a **thesis fork of IPC** (see `docs/ATTRIBUTION.md`), extended to test whether **correlation-aware**
 decisions beat per-edge/correlation-blind robust PGO on **correlated (grouped) outliers**. Experiment-first.

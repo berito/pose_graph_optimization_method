@@ -66,11 +66,18 @@ piecemeal.
 
 ## Where the data lives
 
-`experiments/datasets` is a **symlink** to
-`../../pose_graph_optimization_experiments/datasets` — the one shared dataset folder, so
-nothing is duplicated between repos.
+`experiments/datasets/` is a **real directory** holding the **clean source graphs and ground
+truth** (12 files, ~1.9 MB) — **tracked in git**, byte-identical to the authors' release, which
+the FR079 rule in `HANDOFF.md` depends on. Only the two heavy things are symlinks into the shared
+`../../pose_graph_optimization_experiments/datasets/`, and both are gitignored:
 
-⚠ It was **broken** until 2026-09-07: it pointed at `../../../datasets`
-(`code_base/datasets`), which does not exist, so git reported twelve tracked dataset files
-as deleted and the repo had no data at all. If those files show as deleted again, check the
-symlink before checking anything else.
+| path | size | why not tracked |
+|---|---|---|
+| `experiments/datasets/2D/M3500/SPOILED_DATA` | 84 MB | generated, deterministic — regenerate via `experiments/datagen/` |
+| `experiments/datasets/tum` | 3.9 GB | re-downloadable; over GitHub's 100 MB file limit |
+
+⚠ **History.** The whole `experiments/datasets` path was itself a symlink until 2026-09-07, and
+before that a *broken* one pointing at a nonexistent `code_base/datasets` — so git reported all
+twelve tracked dataset files as deleted and the repo had no data at all. They are now committed
+outright, so that failure mode is gone. A **fresh clone** still gets dangling links for the two
+rows above; regenerate or re-download them before a run that needs them.
