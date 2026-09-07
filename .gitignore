@@ -6,8 +6,11 @@ build/
 docs/*.pdf
 
 # NOTE: experiments/datasets/ (clean source graphs, ~2 MB of g2o/text) IS tracked — small enough to commit.
-# …but generated spoiled data is NOT tracked (regenerable, large):
-experiments/datasets/**/SPOILED_DATA*/
+# …but generated spoiled data is NOT tracked (regenerable, large). No trailing slash: these may be
+# symlinks into the external experiments dir, and a dir-only pattern would not match a symlink.
+experiments/datasets/**/SPOILED_DATA*
+# TUM RGB-D tarballs (~3.9 GB, re-downloadable) — never tracked; exceeds GitHub's 100 MB file limit.
+experiments/datasets/tum
 
 # Experiment outputs — track ONLY the small metric files (.PR ~0.1 MB, .TE ~0.2 MB) for portability;
 # ignore bulky trajectory dumps (.TRJ ~185 MB), scratch dirs, and logs (all regenerable).

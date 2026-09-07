@@ -43,6 +43,12 @@ Do **not** skip to step 3. Do **not** modify the methods. We confirm the authors
    paper's **6-dataset-averaged** recall (per-dataset recall is never published; only Table II *times* are).
    **IF the S1 averaged recall diverges from the paper (>80%), FR079 is the first suspect — revisit it then,
    but NEVER silently edit the author's dataset.** (Converting it would corrupt the replication.)
+7. **Hardware vs results.** Author ran on an **Intel Xeon Gold 5220** (thesis; IPC paper doesn't state it).
+   - **Accuracy (Precision/Recall/F1/ATE/RPE) is hardware-INDEPENDENT** — deterministic from input+params.
+     So the verification verdict is valid on any machine (your 16-core box, the 52-core server, the Xeon).
+   - **Timing (convergence time, ACTxC, runtime) IS hardware-dependent.** Do NOT expect to match the
+     paper's absolute time numbers (IPC ≈321/443 s; M3500 ACTxC ≈0.54–0.72 s/constraint) — compare only
+     RELATIVE timing/trends. **Never fail verification because times differ across machines.**
 
 ## Current state (at handoff)
 - Build **GREEN** in the devcontainer (IPC + 24 g2o baselines + GTSAM/PCM + evaluator).
