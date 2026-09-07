@@ -1,0 +1,17 @@
+# Vendored files that differ from the pinned upstream, and where the reason is written.
+#
+# ⭐ The rule: a vendor's SOURCE is never edited — a comparator whose source we changed is
+# no longer the published method, and no one can tell by looking. When a vendored file
+# will not build, the fixed copy goes in `vendor_patched/` and the build points at it;
+# the original stays byte-identical. See CLAUDE.md § Vendor code is never edited.
+#
+# ⚠ Only BUILD CONFIGURATION may differ in place — a CMakeLists path, a cfg/*.yaml with
+# the author's absolute paths made relative. Configuration is not the algorithm. Every
+# such difference is listed here, citing where its full reason lives.
+#
+# path relative to this repo <TAB> why <TAB> recorded in
+baselines/robust_g2o/src/incr/CMakeLists.txt	IN_RRR_2D/3D compile the fixed copies in vendor_patched/ instead of the vendor sources, which do not build against this g2o (ambiguous make_unique). Build path only; the vendor .cpp files are byte-identical to upstream	baselines/VENDOR.md §6 · vendor_patched/robust_g2o/incr/rrr_2D.cpp header
+ipc/CMakeLists.txt	drop the author's hard-coded `set(G2O_ROOT /home/slam-emix/Workspace/lib/g2o)` (their machine); find g2o via find_package, and locate SuiteSparse's cs.h which src/utils.cpp needs. Portability only	baselines/VENDOR.md · the comments in the file
+baselines/CMakeLists.txt	guard the GTSAM/Kimera tier behind BUILD_GTSAM_BASELINES so the g2o baselines build without GTSAM. Adds an option; changes no default behaviour of what is built	baselines/VENDOR.md §1-5
+baselines/robust_g2o/CMakeLists.txt	alias `yaml-cpp` -> `yaml-cpp::yaml-cpp`; Ubuntu 22.04 ships yaml-cpp 0.7, which has no namespaced target (added in 0.8). Link-name only	baselines/VENDOR.md §1-5
+baselines/robust_gtsam/CMakeLists.txt	⚠ Intel MKL made OPTIONAL (find_package(MKL QUIET), MKL_LIBRARIES empty when absent). NOT purely cosmetic: GTSAM linked against Eigen's BLAS instead of MKL can differ in floating-point rounding, so a number produced here may not match one produced with MKL to the last digits. Not an algorithm change, but say so if results are ever compared against a published table	baselines/VENDOR.md §1-5

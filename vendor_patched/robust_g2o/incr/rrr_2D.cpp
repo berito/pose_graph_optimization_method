@@ -1,3 +1,21 @@
+// ── PATCHED COPY — the original in baselines/ is untouched ───────────────────
+//
+// Source:  baselines/robust_g2o/src/incr/rrr_2D.cpp  (RobustOptimizationSLAM, Olivastri)
+// Change:  `make_unique<…>` → `std::make_unique<…>`, two lines.
+// Why:     this g2o ships its own `g2o::make_unique`, and the file has both
+//          `using namespace std;` and `using namespace g2o;` — so the bare call is
+//          ambiguous and will not compile. Build portability only; the algorithm,
+//          the parameters and the numbers are unchanged.
+//
+// ⭐ Why it lives here and not in baselines/: RRR is a COMPARATOR. If its source is
+// edited, we are no longer comparing against the published method — we are comparing
+// against our copy of it, and nobody can tell the difference by looking. The vendor
+// tree stays byte-identical to the pinned upstream, and this copy is what compiles.
+// Verified by scripts/check_vendor.sh.
+//
+// ⚠ Do not "improve" anything else in this file. Its only licence to exist is that it
+// would not build otherwise; every other difference from upstream is a defect.
+// ─────────────────────────────────────────────────────────────────────────────
 #include "utils.hpp"
 #include "rrr/include/RRR.hpp"
 #include "g2o/core/optimization_algorithm_levenberg.h"
@@ -29,9 +47,9 @@ int main(int argc, char **argv)
 	int nIter = cfg.maxiters; // 4
 
 	SparseOptimizer optimizer;
-	auto linearSolver = make_unique<LinearSolverEigen<BlockSolverX::PoseMatrixType>>();
+	auto linearSolver = std::make_unique<LinearSolverEigen<BlockSolverX::PoseMatrixType>>();
 	linearSolver->setBlockOrdering(false);
-	auto blockSolver = make_unique<BlockSolverX>(move(linearSolver));
+	auto blockSolver = std::make_unique<BlockSolverX>(move(linearSolver));
 	OptimizationAlgorithmGaussNewton *solver = new OptimizationAlgorithmGaussNewton(move(blockSolver));
 	optimizer.setAlgorithm(solver);
 	optimizer.load(input_dataset.c_str());
